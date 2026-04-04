@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bura - Satın Alma Asistanı</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1557b0;
+      --success: #34a853;
+      --danger: #ea4335;
+      --warning: #fbbc04;
+      --bg: #f1f3f4;
+      --card: #ffffff;
+      --border: #dadce0;
+      --text: #202124;
+      --text-muted: #5f6368;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    header h1 { font-size: 1.2rem; font-weight: 600; flex: 1; }
+    #status-bar {
+      font-size: .75rem;
+      background: rgba(255,255,255,.15);
+      padding: 4px 10px;
+      border-radius: 20px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Layout ── */
+    main { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+    /* ── Stepper ── */
+    .stepper {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+    .step-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      background: var(--card);
+      color: var(--text-muted);
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      transition: background .2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .step-btn:last-child { border-right: none; }
+    .step-btn .num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-muted);
+      font-size: .75rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-btn.active { background: #e8f0fe; color: var(--primary); }
+    .step-btn.active .num { background: var(--primary); color: #fff; }
+    .step-btn.done .num { background: var(--success); color: #fff; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .card-header span { flex: 1; }
+    .card-body { padding: 16px; }
+
+    /* ── Butonlar ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+    }
+    .btn-sm { padding: 6px 12px; font-size: .82rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── Liste ── */
+    .list-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: background .15s;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover, .list-item.selected { background: #e8f0fe; }
+    .list-item .icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .icon-mail  { background: #e8f0fe; }
+    .icon-prod  { background: #e6f4ea; }
+    .icon-supp  { background: #fce8e6; }
+    .list-item .info { flex: 1; min-width: 0; }
+    .list-item .title {
+      font-weight: 500;
+      font-size: .9rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .list-item .sub { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .badge {
+      font-size: .7rem;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .badge-blue   { background: #e8f0fe; color: var(--primary); }
+    .badge-green  { background: #e6f4ea; color: var(--success); }
+    .badge-orange { background: #fef7e0; color: #b06000; }
+
+    /* ── Tablo ── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th {
+      background: #f8f9fa;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr.selected-row td { background: #e8f0fe; }
+    td a { color: var(--primary); text-decoration: none; font-size: .8rem; }
+    td a:hover { text-decoration: underline; }
+
+    /* ── Checkbox ── */
+    .cb-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+
+    /* ── Textarea & Input ── */
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: .82rem; font-weight: 500; margin-bottom: 4px; color: var(--text-muted); }
+    input[type=text], input[type=email], textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: inherit;
+      transition: border-color .2s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    textarea { min-height: 220px; resize: vertical; font-family: "Courier New", monospace; font-size: .82rem; }
+
+    /* ── İlerleme ── */
+    .progress-wrap { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 8px; }
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+      width: 0%;
+      transition: width .4s;
+    }
+    .progress-bar.indeterminate {
+      animation: indeterminate 1.4s infinite;
+      width: 40%;
+    }
+    @keyframes indeterminate {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    /* ── Panel ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Boş durum ── */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty .big { font-size: 2.5rem; margin-bottom: 8px; }
+    .empty p { font-size: .9rem; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #323232;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: .88rem;
+      z-index: 9999;
+      transition: transform .3s ease;
+      max-width: 90vw;
+      text-align: center;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { background: var(--success); }
+    #toast.error   { background: var(--danger); }
+
+    /* ── Mobil düzeltmeler ── */
+    @media (max-width: 480px) {
+      header h1 { font-size: 1rem; }
+      .step-btn { font-size: .7rem; }
+      .btn { font-size: .85rem; padding: 9px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📦 Bura</h1>
+  <div id="status-bar">Hazır</div>
+</header>
+
+<!-- Stepper -->
+<main>
+  <div class="stepper">
+    <button class="step-btn active" onclick="goStep(1)" id="s1">
+      <span class="num">1</span> Mailler
+    </button>
+    <button class="step-btn" onclick="goStep(2)" id="s2">
+      <span class="num">2</span> Ürünler
+    </button>
+    <button class="step-btn" onclick="goStep(3)" id="s3">
+      <span class="num">3</span> Tedarikçi
+    </button>
+    <button class="step-btn" onclick="goStep(4)" id="s4">
+      <span class="num">4</span> Mail Gönder
+    </button>
+  </div>
+
+  <!-- ════ ADIM 1: MAİLLER ════ -->
+  <div class="panel active" id="panel-1">
+    <div class="card">
+      <div class="card-header">
+        <span>📬 Gelen Mailler</span>
+        <button class="btn btn-outline btn-sm" onclick="loadMails()">🔄 Yenile</button>
+      </div>
+      <div id="mail-list">
+        <div class="empty">
+          <div class="big">📭</div>
+          <p>Mailleri yüklemek için<br><strong>Yenile</strong> butonuna basın.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ADIM 2: ÜRÜNLER ════ -->
+  <div class="panel" id="panel-2">
+    <div class="card">
+      <div class="card-header">
+        <span>📋 SARF MALZEME BEYLIKDUZU FABRIKA</span>
+      </div>
+      <div id="product-list">
+        <div class="empty"><div class="big">📄</div><p>Önce bir mail seçin.</p></div>
+      </div>
+      <div class="card-body" id="product-actions" style="display:none; border-top:1px solid var(--border);">
+        <button class="btn btn-primary btn-full" onclick="startSearch()">
+          🔍 Seçili Ürünler İçin Tedarikçi Ara
+        </button>
+        <p style="font-size:.75rem;color:var(--text-muted);margin-top:6px;text-align:center;">
+          Hiçbiri seçilmezse tüm ürünler aranır.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ADIM 3: TEDARİKÇİLER ════ -->
+  <div class="panel" id="panel-3">
+    <div class="card">
+      <div class="card-header">
+        <span>🏭 Bulunan Tedarikçiler</span>
+      </div>
+      <div id="search-progress" style="display:none; padding:16px;">
+        <p id="progress-text" style="font-size:.85rem;color:var(--text-muted);margin-bottom:6px;"></p>
+        <div class="progress-wrap"><div class="progress-bar indeterminate" id="prog-bar"></div></div>
+      </div>
+      <div id="supplier-list">
+        <div class="empty"><div class="big">🔍</div><p>Henüz arama yapılmadı.</p></div>
+      </div>
+      <div class="card-body" id="supplier-actions" style="display:none; border-top:1px solid var(--border);">
+        <button class="btn btn-primary btn-full" onclick="prepareDraft()">
+          ✉️ Seçili Firmalar İçin Mail Hazırla
+        </button>
+        <p style="font-size:.75rem;color:var(--text-muted);margin-top:6px;text-align:center;">
+          Hiçbiri seçilmezse tüm firmalar eklenir.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ADIM 4: MAİL GÖNDER ════ -->
+  <div class="panel" id="panel-4">
+    <div class="card">
+      <div class="card-header"><span>📤 Teklif Maili Gönder</span></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Alıcı E-posta</label>
+          <input type="email" id="mail-to" placeholder="ornek@firma.com">
+        </div>
+        <div class="form-group">
+          <label>Konu</label>
+          <input type="text" id="mail-subject">
+        </div>
+        <div class="form-group">
+          <label>İçerik</label>
+          <textarea id="mail-body"></textarea>
+        </div>
+        <button class="btn btn-success btn-full" onclick="sendMail()" style="margin-top:4px;">
+          🚀 Gönder
+        </button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+let mails = [];
+let products = [];
+let suppliers = [];
+let selectedMailId = null;
+let searchPollTimer = null;
+
+// ── Adım yönetimi ──────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.panel').forEach((p, i) => {
+    p.classList.toggle('active', i + 1 === n);
+  });
+  document.querySelectorAll('.step-btn').forEach((b, i) => {
+    b.classList.toggle('active', i + 1 === n);
+  });
+}
+
+function markStepDone(n) {
+  document.getElementById('s' + n).classList.add('done');
+}
+
+// ── Status ──────────────────────────────────────────────
+function setStatus(msg) {
+  document.getElementById('status-bar').textContent = msg;
+}
+
+// ── Toast ────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  setTimeout(() => { el.className = ''; }, 3200);
+}
+
+// ── ADIM 1: Mailleri yükle ─────────────────────────────
+async function loadMails() {
+  setStatus('Mailler yükleniyor...');
+  const el = document.getElementById('mail-list');
+  el.innerHTML = '<div class="empty"><div class="big">⏳</div><p>Outlook\'a bağlanılıyor...</p></div>';
+
+  const res = await fetch('/api/mails').then(r => r.json()).catch(() => null);
+  if (!res || !res.ok) {
+    el.innerHTML = `<div class="empty"><div class="big">❌</div><p>${res?.error || 'Bağlantı hatası.'}</p></div>`;
+    setStatus('Hata');
+    return;
+  }
+
+  mails = res.mails;
+  if (!mails.length) {
+    el.innerHTML = '<div class="empty"><div class="big">📭</div><p>Eşleşen mail bulunamadı.</p></div>';
+    setStatus('Mail yok');
+    return;
+  }
+
+  el.innerHTML = mails.map((m, i) => `
+    <div class="list-item" id="mi-${i}" onclick="selectMail(${i})">
+      <div class="icon icon-mail">📧</div>
+      <div class="info">
+        <div class="title">${esc(m.sender)}</div>
+        <div class="sub">${esc(m.date)}</div>
+      </div>
+      ${m.has_pdf ? '<span class="badge badge-blue">PDF</span>' : ''}
+    </div>`).join('');
+
+  setStatus(`${mails.length} mail`);
+  markStepDone(1);
+}
+
+async function selectMail(idx) {
+  document.querySelectorAll('.list-item').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  selectedMailId = mails[idx].id;
+
+  goStep(2);
+  setStatus('PDF okunuyor...');
+  const el = document.getElementById('product-list');
+  el.innerHTML = '<div class="empty"><div class="big">⏳</div><p>PDF ayrıştırılıyor...</p></div>';
+  document.getElementById('product-actions').style.display = 'none';
+
+  const res = await fetch(`/api/mail/${encodeURIComponent(selectedMailId)}/products`)
+    .then(r => r.json()).catch(() => null);
+
+  if (!res || !res.ok) {
+    el.innerHTML = `<div class="empty"><div class="big">❌</div><p>${res?.error || 'Hata oluştu.'}</p></div>`;
+    setStatus('Hata');
+    return;
+  }
+
+  products = res.products;
+  if (!products.length) {
+    el.innerHTML = '<div class="empty"><div class="big">📄</div><p>PDF\'de ürün bulunamadı.</p></div>';
+    setStatus('Ürün yok');
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Kod</th><th>Ürün Adı</th><th>Birim</th><th>Miktar</th></tr></thead>
+        <tbody>${products.map((p, i) => `
+          <tr id="pr-${i}">
+            <td><label class="cb-row"><input type="checkbox" class="prod-cb" value="${i}"></label></td>
+            <td>${esc(p.code)}</td>
+            <td>${esc(p.name)}</td>
+            <td>${esc(p.unit)}</td>
+            <td>${esc(p.quantity)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('product-actions').style.display = 'block';
+  setStatus(`${products.length} ürün`);
+  markStepDone(2);
+}
+
+// ── ADIM 3: Tedarikçi araması ──────────────────────────
+function getSelectedProducts() {
+  const checked = [...document.querySelectorAll('.prod-cb:checked')].map(c => parseInt(c.value));
+  return checked.length ? checked.map(i => products[i]) : products;
+}
+
+async function startSearch() {
+  const selected = getSelectedProducts();
+  const names = selected.map(p => p.name).filter(Boolean);
+  if (!names.length) { toast('Ürün bulunamadı.', 'error'); return; }
+
+  goStep(3);
+  document.getElementById('search-progress').style.display = 'block';
+  document.getElementById('supplier-list').innerHTML = '';
+  document.getElementById('supplier-actions').style.display = 'none';
+  setStatus('Aranıyor...');
+
+  const res = await fetch('/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ products: names }),
+  }).then(r => r.json()).catch(() => null);
+
+  if (!res || !res.ok) {
+    toast(res?.error || 'Arama başlatılamadı.', 'error');
+    return;
+  }
+
+  pollSearch();
+}
+
+function pollSearch() {
+  searchPollTimer = setInterval(async () => {
+    const s = await fetch('/api/search/status').then(r => r.json()).catch(() => null);
+    if (!s) return;
+
+    document.getElementById('progress-text').textContent = s.progress;
+
+    if (s.done) {
+      clearInterval(searchPollTimer);
+      document.getElementById('search-progress').style.display = 'none';
+      renderSuppliers(s.results);
+    }
+  }, 1500);
+}
+
+function renderSuppliers(list) {
+  suppliers = list;
+  const el = document.getElementById('supplier-list');
+
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><div class="big">😕</div><p>Tedarikçi bulunamadı.</p></div>';
+    setStatus('Sonuç yok');
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Firma</th><th>E-posta</th><th>Ürün</th><th>Site</th></tr></thead>
+        <tbody>${list.map((s, i) => `
+          <tr>
+            <td><label class="cb-row"><input type="checkbox" class="supp-cb" value="${i}" ${s.email ? 'checked' : ''}></label></td>
+            <td>${esc(s.name)}</td>
+            <td>${s.email ? `<a href="mailto:${esc(s.email)}">${esc(s.email)}</a>` : '<span style="color:var(--text-muted)">-</span>'}</td>
+            <td style="font-size:.78rem;color:var(--text-muted)">${esc(s.product)}</td>
+            <td><a href="${esc(s.url)}" target="_blank">🔗</a></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('supplier-actions').style.display = 'block';
+  setStatus(`${list.length} tedarikçi`);
+  markStepDone(3);
+}
+
+// ── ADIM 4: Mail hazırla & gönder ─────────────────────
+function getSelectedSuppliers() {
+  const checked = [...document.querySelectorAll('.supp-cb:checked')].map(c => parseInt(c.value));
+  return checked.length ? checked.map(i => suppliers[i]) : suppliers;
+}
+
+async function prepareDraft() {
+  const selected = getSelectedSuppliers();
+  const toList = selected.map(s => s.email).filter(Boolean);
+
+  const res = await fetch('/api/draft', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ products }),
+  }).then(r => r.json()).catch(() => null);
+
+  if (!res || !res.ok) { toast('Taslak oluşturulamadı.', 'error'); return; }
+
+  document.getElementById('mail-to').value = toList.join('; ');
+  document.getElementById('mail-subject').value = res.subject;
+  document.getElementById('mail-body').value = res.body;
+
+  goStep(4);
+  markStepDone(4);
+}
+
+async function sendMail() {
+  const to      = document.getElementById('mail-to').value.trim();
+  const subject = document.getElementById('mail-subject').value.trim();
+  const body    = document.getElementById('mail-body').value.trim();
+
+  if (!to)      { toast('Alıcı adresi boş!', 'error'); return; }
+  if (!subject) { toast('Konu boş!', 'error'); return; }
+
+  setStatus('Gönderiliyor...');
+
+  const res = await fetch('/api/send-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to, subject, body }),
+  }).then(r => r.json()).catch(() => null);
+
+  if (res?.ok) {
+    toast('Mail başarıyla gönderildi! ✅', 'success');
+    setStatus('Gönderildi');
+  } else {
+    toast(res?.error || 'Gönderim hatası.', 'error');
+    setStatus('Hata');
+  }
+}
+
+// ── Yardımcılar ─────────────────────────────────────────
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Sayfa açıldığında mailleri otomatik yükle
+window.addEventListener('load', loadMails);
+</script>
+</body>
+</html>
