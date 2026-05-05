@@ -1,83 +1,83 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Bu dosya, Claude Code'un (claude.ai/code) bu repoda çalışırken kullanması için hazırlanmıştır.
 
-## What This Project Does
+## Proje Hakkında
 
-**Bura** is a Windows-only Turkish-language procurement assistant ("Satın Alma Talebi Asistanı"). It automates a specific workflow for a manufacturing company:
+**Bura**, yalnızca Windows'ta çalışan, Türkçe bir satın alma talebi asistanıdır. Bir üretim firmasına özgü şu iş akışını otomatikleştirir:
 
-1. Read Outlook emails whose subject contains `"A.KAHVECI MIN ALTINA DUSEN STOKLARINIZ LİSTELENMİŞTİR"`
-2. Extract PDF attachments and parse the `"SARF MALZEME BEYLIKDUZU FABRIKA"` section for a product list
-3. Google-search for Turkish suppliers for each product
-4. Compose and send quote-request emails via Outlook
+1. Outlook'ta konusu `"A.KAHVECI MIN ALTINA DUSEN STOKLARINIZ LİSTELENMİŞTİR"` içeren e-postaları filtreler
+2. PDF eklerini indirip `"SARF MALZEME BEYLIKDUZU FABRIKA"` bölümündeki ürün listesini çıkarır
+3. Her ürün için Google'da Türk tedarikçi arar, iletişim bilgilerini toplar
+4. Outlook üzerinden teklif isteme maili hazırlayıp gönderir
 
-It ships in two modes that share the same core modules:
-- **Desktop GUI** (`bura_app/`) — tkinter app launched via `BASLA.bat`
-- **Web app** (`web_app/`) — Flask server accessible from phones/tablets on the same WiFi, launched via `WEB_BASLA.bat`
+İki modda çalışır; her ikisi de aynı çekirdek modülleri paylaşır:
+- **Masaüstü GUI** (`bura_app/`) — tkinter uygulaması, `BASLA.bat` ile başlatılır
+- **Web uygulaması** (`web_app/`) — aynı WiFi'daki telefon/tabletten erişilebilen Flask sunucusu, `WEB_BASLA.bat` ile başlatılır
 
-## Running the Applications
+## Uygulamaları Çalıştırma
 
-**Install dependencies (Windows):**
+**Bağımlılıkları yükle (Windows):**
 ```
 pip install pywin32 pdfplumber googlesearch-python requests beautifulsoup4 flask
 ```
-Or run `KURULUM.bat` (desktop) / `WEB_KURULUM.bat` (web) on Windows.
+Ya da Windows'ta `KURULUM.bat` (masaüstü) / `WEB_KURULUM.bat` (web) çalıştırılabilir.
 
-**Desktop GUI:**
+**Masaüstü GUI:**
 ```
 cd bura_app
 python main.py
 ```
 
-**Web server** (accessible at `http://localhost:5000`, or `http://<PC-IP>:5000` from mobile):
+**Web sunucusu** (`http://localhost:5000` veya `http://<PC-IP>:5000` ile mobil erişim):
 ```
 cd web_app
 python app.py
 ```
 
-There are no tests or linting configurations in this project.
+Projede test veya linting yapılandırması bulunmamaktadır.
 
-## Architecture
+## Mimari
 
-### Module Sharing Pattern
+### Modül Paylaşım Yapısı
 
-`web_app/app.py` manually adds `../bura_app` to `sys.path`, so both entry points import the same four core modules directly by filename (not as a package):
+`web_app/app.py`, `sys.path`'e `../bura_app` dizinini manuel olarak ekler; böylece her iki giriş noktası da aynı dört çekirdek modülü doğrudan içe aktarır (paket yapısı yoktur):
 
-| Module | Key class | Purpose |
+| Modül | Ana sınıf | Amaç |
 |---|---|---|
-| `outlook_reader.py` | `OutlookReader` | Connects to Outlook via `win32com.client`, filters mails, saves PDF attachments to a temp dir |
-| `pdf_parser.py` | `PDFParser` | Parses PDFs with `pdfplumber`; extracts product rows from the hardcoded target section |
-| `web_searcher.py` | `WebSearcher` | Google-searches per product, scrapes contact info (email/phone) from result pages |
-| `email_sender.py` | `EmailSender` + helpers | Sends or saves-as-draft via Outlook COM; `build_mail_body` / `build_subject` format the quote email |
+| `outlook_reader.py` | `OutlookReader` | `win32com.client` ile Outlook'a bağlanır, mailleri filtreler, PDF eklerini geçici dizine kaydeder |
+| `pdf_parser.py` | `PDFParser` | `pdfplumber` ile PDF okur; sabit hedef bölümden ürün satırlarını çıkarır |
+| `web_searcher.py` | `WebSearcher` | Her ürün için Google araması yapar, sonuç sayfalarından e-posta/telefon bilgisi toplar |
+| `email_sender.py` | `EmailSender` + yardımcılar | Outlook COM üzerinden mail gönderir veya taslağa kaydeder; `build_mail_body` / `build_subject` teklif mailini biçimlendirir |
 
-### Windows-Only Constraint
+### Yalnızca Windows Kısıtı
 
-`OutlookReader` and `EmailSender` both require `pywin32` and a running Outlook 2016+ process. All COM calls are in `win32com.client.Dispatch("Outlook.Application")`. There is no fallback for non-Windows environments.
+`OutlookReader` ve `EmailSender`, `pywin32` ve çalışan bir Outlook 2016+ sürecini zorunlu kılar. Tüm COM çağrıları `win32com.client.Dispatch("Outlook.Application")` üzerinden yapılır. Windows dışı ortamlar için yedek mekanizma yoktur.
 
-### Desktop GUI (`bura_app/gui/`)
+### Masaüstü GUI (`bura_app/gui/`)
 
-- `MainWindow` (tkinter `Tk`) owns all four core module instances and coordinates the panels.
-- Long operations (Outlook connect, PDF parse, web search) always run in `threading.Thread(daemon=True)` and post results back via `self.after(0, callback)` to stay thread-safe with tkinter.
-- `ProductPanel` and `SupplierPanel` are `ttk.Frame` subclasses; they communicate back to `MainWindow` through callback functions (`on_search_request`, `on_prepare_email`) passed at construction time.
-- `EmailPreviewDialog` is a modal `tk.Toplevel`.
+- `MainWindow` (tkinter `Tk`), dört çekirdek modül örneğine sahiptir ve paneller arası koordinasyonu yönetir.
+- Outlook bağlantısı, PDF ayrıştırma ve web araması gibi uzun işlemler her zaman `threading.Thread(daemon=True)` içinde çalışır; sonuçlar `self.after(0, callback)` ile tkinter ana iş parçacığına iletilir.
+- `ProductPanel` ve `SupplierPanel`, `ttk.Frame` alt sınıflarıdır; `MainWindow` ile yapım sırasında geçirilen callback fonksiyonları (`on_search_request`, `on_prepare_email`) aracılığıyla iletişir.
+- `EmailPreviewDialog` modal bir `tk.Toplevel` penceresidir.
 
-### Web App (`web_app/`)
+### Web Uygulaması (`web_app/`)
 
-- Four global instances (`_reader`, `_parser`, `_searcher`, `_sender`) are shared across all requests.
-- A `_mail_cache` dict (keyed by `entry_id`) bridges the two-step flow: `GET /api/mails` populates it, then `GET /api/mail/<id>/products` reads from it. The cache is cleared on each mail refresh.
-- Supplier search runs in a background `threading.Thread`; progress is tracked in `_search_state` (a plain dict) and polled by the frontend at `GET /api/search/status` every 1.5 seconds.
-- The frontend (`index.html`) is a single-file SPA with vanilla JS and a 4-step stepper — no framework or build step.
+- Dört global örnek (`_reader`, `_parser`, `_searcher`, `_sender`) tüm istekler arasında paylaşılır.
+- `_mail_cache` sözlüğü (`entry_id` anahtarlı), iki adımlı akışa köprü kurar: `GET /api/mails` önbelleği doldurur, ardından `GET /api/mail/<id>/products` oradan okur. Her mail yenilemesinde önbellek temizlenir.
+- Tedarikçi araması arka planda `threading.Thread` ile çalışır; ilerleme `_search_state` sözlüğünde tutulur ve ön yüz tarafından her 1,5 saniyede `GET /api/search/status` ile sorgulanır.
+- Ön yüz (`index.html`), çerçeve veya derleme adımı gerektirmeyen, saf JavaScript ile yazılmış tek dosyalı bir SPA'dır.
 
-### Hardcoded Business Constants
+### Sabit İş Mantığı Sabitleri
 
-Two constants must match the actual document formats exactly:
-- `outlook_reader.py:24` — `TARGET_SUBJECT` — email subject filter string
-- `pdf_parser.py:13` — `TARGET_SECTION` — PDF section heading to start parsing from
+İki sabit, gerçek belge formatlarıyla tam olarak eşleşmek zorundadır:
+- `outlook_reader.py:24` — `TARGET_SUBJECT` — mail konusu filtre metni
+- `pdf_parser.py:13` — `TARGET_SECTION` — ayrıştırmanın başlayacağı PDF bölüm başlığı
 
-### PDF Parsing Strategy
+### PDF Ayrıştırma Stratejisi
 
-`PDFParser` tries table extraction first (`pdfplumber` tables), then falls back to plain text. Section detection uses an uppercase-ratio heuristic (`_is_section_header`): ≥70% uppercase characters and no digits signals a new section header, stopping extraction.
+`PDFParser` önce tablo çıkarımını dener (`pdfplumber` tabloları), başarısız olursa düz metne geçer. Bölüm tespiti büyük harf oranı buluşsal yöntemine dayanır (`_is_section_header`): %70'ten fazla büyük harf ve hiç rakam içermeyen bir satır yeni bölüm başlığı sayılır ve çıkarım durdurulur.
 
-### Google Search Rate Limiting
+### Google Arama Hız Sınırı
 
-`WebSearcher.SEARCH_DELAY = 2.5` seconds is applied between products to avoid hitting Google rate limits. Long searches (many products) will block the background thread for minutes.
+`WebSearcher.SEARCH_DELAY = 2.5` saniye, Google hız sınırını aşmamak için ürünler arasında uygulanır. Çok sayıda ürünü kapsayan aramalar arka plan iş parçacığını dakikalarca meşgul edebilir.
