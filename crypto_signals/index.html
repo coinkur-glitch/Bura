@@ -50,21 +50,50 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 .score-bar-fill{height:100%;border-radius:3px;transition:.5s}
 .score-number{font-size:.72rem;color:#8b949e;text-align:right;margin-top:.1rem}
 /* signal rows */
-.sig-list{max-height:540px;overflow-y:auto}
-.sig-list::-webkit-scrollbar{width:3px}
+.sig-list{max-height:620px;overflow-y:auto;overflow-x:hidden}
+.sig-list::-webkit-scrollbar{width:4px}
+.sig-list::-webkit-scrollbar-track{background:#0d1117}
 .sig-list::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
-.sig-row{padding:.8rem 1rem;border-bottom:1px solid #1c2128;border-left:3px solid transparent;transition:.15s;display:flex;gap:.7rem}
+.sig-row{display:block;width:100%;padding:.9rem 1.1rem;border-bottom:1px solid #21262d;border-left:4px solid transparent;transition:background .15s;cursor:default}
 .sig-row:hover{background:#1c2128}
 .sig-row.LONG{border-left-color:#2ea043}
 .sig-row.SHORT{border-left-color:#f85149}
 .sig-row.ALERT{border-left-color:#d29922}
-.sig-sym{font-weight:700;font-size:.88rem;color:#e6edf3}
-.sig-time{font-size:.7rem;color:#6e7681;margin-left:auto}
-.sig-reasons{font-size:.76rem;color:#8b949e;margin:.25rem 0;line-height:1.5}
-.sig-meta{display:flex;gap:.7rem;flex-wrap:wrap;font-size:.73rem;color:#6e7681;margin-top:.2rem}
-.sig-meta b{color:#c9d1d9}
-.sltp-row{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.35rem;font-size:.72rem}
-.sl-v{color:#f85149}.tp1-v{color:#3fb950}.tp2-v{color:#58c973}.tp3-v{color:#7ee0a0}
+/* sig header */
+.sig-head{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem}
+.sig-emoji{font-size:1rem;flex-shrink:0}
+.sig-sym{font-weight:700;font-size:.92rem;color:#e6edf3}
+.sig-score-num{font-size:.78rem;font-weight:700;color:#e6edf3;background:#21262d;border:1px solid #30363d;border-radius:4px;padding:.1rem .4rem;margin-left:auto}
+.sig-time{font-size:.7rem;color:#484f58}
+/* score bar */
+.sig-score-bar{height:4px;background:#21262d;border-radius:2px;overflow:hidden;margin-bottom:.55rem}
+.sig-score-fill{height:100%;border-radius:2px;transition:.5s}
+/* reasons */
+.sig-reasons{font-size:.78rem;color:#8b949e;line-height:1.6;margin-bottom:.5rem}
+.sig-reasons .r-item{display:flex;align-items:baseline;gap:.35rem}
+.sig-reasons .r-item::before{content:"•";color:#484f58;flex-shrink:0}
+/* meta chips */
+.sig-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.55rem}
+.sig-chip{background:#21262d;border:1px solid #30363d;border-radius:5px;padding:.18rem .5rem;font-size:.7rem;display:flex;align-items:center;gap:.25rem}
+.sig-chip span{color:#6e7681}
+.sig-chip b{color:#c9d1d9}
+/* SL/TP grid */
+.sltp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.5rem}
+.sltp-cell{background:#21262d;border-radius:6px;padding:.35rem .5rem;text-align:center;border:1px solid #30363d}
+.sltp-cell .sltp-lbl{font-size:.65rem;color:#6e7681;display:block;margin-bottom:.1rem}
+.sltp-cell .sltp-val{font-size:.75rem;font-weight:700;display:block}
+.sltp-cell .sltp-sub{font-size:.62rem;color:#6e7681;display:block}
+.sltp-sl .sltp-val{color:#f85149}
+.sltp-tp1 .sltp-val{color:#3fb950}
+.sltp-tp2 .sltp-val{color:#58c973}
+.sltp-tp3 .sltp-val{color:#7ee0a0}
+/* win rate row */
+.wr-row{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
+.wr-pill{background:#1a1f3a;border:1px solid #1f3a6e;border-radius:4px;padding:.15rem .45rem;font-size:.67rem;color:#8b949e}
+.wr-pill b{color:#58a6ff}
+/* pos btn */
+.sig-pos-btn{font-size:.72rem;padding:.2rem .6rem;border-radius:5px;background:transparent;border:1px solid #30363d;color:#8b949e;cursor:pointer;transition:.15s}
+.sig-pos-btn:hover{background:#21262d;border-color:#58a6ff;color:#58a6ff}
 /* controls */
 .ctrl-bar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.6rem 0 .3rem}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
@@ -918,51 +947,75 @@ function renderPrices(){
 function renderSignals(){
   const list=document.getElementById("sigList");
   document.getElementById("sigCount").textContent=signals.length?signals.length+" sinyal":"";
-  if(!signals.length){list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok</div></div>`;return;}
+  if(!signals.length){
+    list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok — scanner'ı başlatın</div></div>`;
+    return;
+  }
   list.innerHTML=signals.map(s=>{
-    const{label,cls}=s.type==="ALERT"?{label:"⚠️ ALARM",cls:"score-alert"}:getScoreLabel(s.score||0,s.type);
-    const reasons=Array.isArray(s.reasons)?s.reasons.join(" • "):(s.reason||"");
-    const barColor=scoreBarColor(s.score||0);
-    const sltp=s.sl?`
-      <div class="sltp-row">
-        <span class="sl-v">🛑 SL $${s.sl} (%${s.slPct})</span>
-        <span class="tp1-v">🎯 TP1 $${s.tp1} (1:${s.rr1}R)</span>
-        <span class="tp2-v">TP2 $${s.tp2} (1:${s.rr2}R)</span>
-        <span class="tp3-v">TP3 $${s.tp3} (1:${s.rr3}R)</span>
-      </div>
-      <div class="wr-box">
-        <div class="wr-item"><span>TP1 için</span><b>${s.wr1}% WR</b></div>
-        <div class="wr-item"><span>TP2 için</span><b>${s.wr2}% WR</b></div>
-        <div class="wr-item"><span>TP3 için</span><b>${s.wr3}% WR</b></div>
-      </div>`:"";
+    const score=s.score||0;
+    const{label,cls}=s.type==="ALERT"?{label:"⚠️ ALARM",cls:"score-alert"}:getScoreLabel(score,s.type);
+    const barColor=scoreBarColor(score);
+    const em=s.type==="LONG"?"🟢":s.type==="SHORT"?"🔴":"⚠️";
+
+    // Reasons — her biri ayrı satır
+    const reasonsArr=Array.isArray(s.reasons)?s.reasons:[s.reason||""];
+    const reasonsHtml=reasonsArr.slice(0,6).map(r=>`<div class="r-item">${r}</div>`).join("");
+
+    // Meta chips
+    const chips=[
+      `<div class="sig-chip"><span>💰</span><b>$${s.price}</b></div>`,
+      `<div class="sig-chip"><span>RSI</span><b style="color:${rc(+s.rsi)}">${s.rsi}</b></div>`,
+      s.ema&&s.ema!=="-"?`<div class="sig-chip"><span>Trend</span><b style="color:${s.ema==="BULL"?"#3fb950":s.ema==="BEAR"?"#f85149":"#8b949e"}">${s.ema}</b></div>`:"",
+      s.fundingRate&&s.fundingRate!=="0.000"?`<div class="sig-chip"><span>Funding</span><b style="color:${fc(+s.fundingRate)}">${+s.fundingRate>0?"+":""}${s.fundingRate}%</b></div>`:"",
+      s.ls?`<div class="sig-chip"><span>L/S</span><b>${s.ls}</b></div>`:"",
+      s.volRatio&&s.volRatio!=="-"?`<div class="sig-chip"><span>Hacim</span><b style="color:${+s.volRatio>2?"#d2a8ff":+s.volRatio>1.5?"#c9d1d9":"#6e7681"}">×${s.volRatio}</b></div>`:"",
+      s.adx?`<div class="sig-chip"><span>ADX</span><b style="color:${+s.adx>25?"#79c0ff":"#6e7681"}">${s.adx}</b></div>`:"",
+    ].filter(Boolean).join("");
+
+    // SL/TP grid
+    const sltpHtml=s.sl?`
+      <div class="sltp-grid">
+        <div class="sltp-cell sltp-sl">
+          <span class="sltp-lbl">🛑 STOP LOSS</span>
+          <span class="sltp-val">$${s.sl}</span>
+          <span class="sltp-sub">%${s.slPct} uzakta</span>
+        </div>
+        <div class="sltp-cell sltp-tp1">
+          <span class="sltp-lbl">🎯 TP1 (1:${s.rr1}R)</span>
+          <span class="sltp-val">$${s.tp1}</span>
+          <span class="sltp-sub">Min %${s.wr1} WR</span>
+        </div>
+        <div class="sltp-cell sltp-tp2">
+          <span class="sltp-lbl">🎯 TP2 (1:${s.rr2}R)</span>
+          <span class="sltp-val">$${s.tp2}</span>
+          <span class="sltp-sub">Min %${s.wr2} WR</span>
+        </div>
+        <div class="sltp-cell sltp-tp3">
+          <span class="sltp-lbl">🎯 TP3 (1:${s.rr3}R)</span>
+          <span class="sltp-val">$${s.tp3}</span>
+          <span class="sltp-sub">Min %${s.wr3} WR</span>
+        </div>
+      </div>`:""
+
     return`<div class="sig-row ${s.type}">
-      <span style="font-size:1.1rem;flex-shrink:0;margin-top:.1rem">${s.type==="LONG"?"🟢":s.type==="SHORT"?"🔴":"⚠️"}</span>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.2rem">
-          <span class="score-badge ${cls}">${label}</span>
-          <span class="sig-sym">${s.symbol}</span>
-          <span class="sig-time">${s.time||""}</span>
-        </div>
-        <div class="score-bar-wrap">
-          <div class="score-bar-track"><div class="score-bar-fill" style="width:${s.score||0}%;background:${barColor}"></div></div>
-          <div class="score-number">${s.score||0}/100</div>
-        </div>
-        <div class="sig-reasons">${reasons}</div>
-        <div class="sig-meta">
-          <span>💰 <b>$${s.price}</b></span>
-          <span>RSI <b style="color:${rc(+s.rsi)}">${s.rsi}</b></span>
-          <span>Trend <b>${s.ema||"-"}</b></span>
-          ${s.fundingRate?`<span>Funding <b style="color:${fc(+s.fundingRate)}">${s.fundingRate}%</b></span>`:""}
-          ${s.ls?`<span>L/S <b>${s.ls}</b></span>`:""}
-          <span>Hacim <b>×${s.volRatio||"-"}</b></span>
-          ${s.adx?`<span>ADX <b>${s.adx}</b></span>`:""}
-        </div>
-        ${sltp}
-        <button class="btn btn-outline-secondary btn-sm mt-2" style="font-size:.7rem;padding:.15rem .5rem" onclick="openPosFromSignal('${s.symbol}','${s.type}',${s.rawPrice||0},'${s.sl||""}','${s.tp1||""}','${s.tp2||""}','${s.tp3||""}')">
-          <i class="bi bi-plus-circle"></i> Pozisyon Aç
-        </button>
+      <div class="sig-head">
+        <span class="sig-emoji">${em}</span>
+        <span class="score-badge ${cls}">${label}</span>
+        <span class="sig-sym">${s.symbol}</span>
+        <span class="sig-score-num">${score}/100</span>
+        <span class="sig-time">${s.time||""}</span>
       </div>
-    </div>`}).join("");
+      <div class="sig-score-bar">
+        <div class="sig-score-fill" style="width:${score}%;background:${barColor}"></div>
+      </div>
+      <div class="sig-reasons">${reasonsHtml}</div>
+      <div class="sig-chips">${chips}</div>
+      ${sltpHtml}
+      <button class="sig-pos-btn" onclick="openPosFromSignal('${s.symbol}','${s.type}',${s.rawPrice||0},'${s.sl||""}','${s.tp1||""}','${s.tp2||""}','${s.tp3||""}')">
+        <i class="bi bi-plus-circle me-1"></i>Pozisyon Aç
+      </button>
+    </div>`
+  }).join("");
 }
 
 // ════════════════════════════════════
