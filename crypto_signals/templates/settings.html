@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+
+<form method="POST" action="/settings">
+<div class="row g-4">
+
+  <!-- Sol kolon -->
+  <div class="col-lg-6">
+
+    <!-- Telegram -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="bi bi-telegram me-2 text-info"></i>Telegram Bağlantısı
+      </div>
+      <div class="card-body">
+        <p class="text-secondary small mb-3">
+          Telegram bildirimi için <strong>@BotFather</strong>'dan bot token alın,
+          ardından botunuza <code>/start</code> yazın ve Chat ID'yi öğrenin.
+        </p>
+
+        <div class="mb-3">
+          <label class="form-label">Bot Token</label>
+          <input type="text" name="telegram_token" class="form-control font-monospace"
+                 placeholder="123456789:AAHxyz..." value="{{ cfg.telegram_token }}">
+          <div class="form-text text-secondary">
+            @BotFather → /newbot → verilen token
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Chat ID</label>
+          <input type="text" name="telegram_chat_id" class="form-control font-monospace"
+                 placeholder="123456789" value="{{ cfg.telegram_chat_id }}">
+          <div class="form-text text-secondary">
+            Bota /start yaz → <a class="text-info" href="#" id="chatIdLink">Nasıl bulunur?</a>
+          </div>
+        </div>
+
+        <div class="alert alert-secondary small py-2 d-none" id="chatIdHelp">
+          1. Botunuza <strong>/start</strong> yazın<br>
+          2. Şu linki tarayıcınızda açın:<br>
+          <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code><br>
+          3. Gelen JSON'da <code>"chat":{"id": 123...}</code> kısmındaki sayı Chat ID'nizdir.
+        </div>
+
+        <button type="button" class="btn btn-outline-info btn-sm" id="btnTestTelegram">
+          <i class="bi bi-send"></i> Test Mesajı Gönder
+        </button>
+        <span class="ms-2 small" id="testResult"></span>
+      </div>
+    </div>
+
+    <!-- Tarama Ayarları -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="bi bi-sliders me-2 text-warning"></i>Tarama Ayarları
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Zaman Dilimi</label>
+            <select name="timeframe" class="form-select">
+              {% for tf in ["1m","5m","15m","30m","1h","4h","1d"] %}
+              <option value="{{ tf }}" {% if cfg.timeframe == tf %}selected{% endif %}>{{ tf }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Tarama Aralığı (sn)</label>
+            <input type="number" name="scan_interval" class="form-control"
+                   min="10" max="3600" value="{{ cfg.scan_interval }}">
+          </div>
+          <div class="col-6">
+            <label class="form-label">RSI Aşırı Satım</label>
+            <input type="number" name="rsi_oversold" class="form-control"
+                   min="1" max="49" value="{{ cfg.rsi_oversold }}">
+          </div>
+          <div class="col-6">
+            <label class="form-label">RSI Aşırı Alım</label>
+            <input type="number" name="rsi_overbought" class="form-control"
+                   min="51" max="99" value="{{ cfg.rsi_overbought }}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sağ kolon -->
+  <div class="col-lg-6">
+
+    <!-- Semboller -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="bi bi-currency-bitcoin me-2 text-warning"></i>İzlenen Semboller
+      </div>
+      <div class="card-body">
+        <label class="form-label">Her satıra bir sembol (Binance formatı)</label>
+        <textarea name="symbols" class="form-control font-monospace" rows="6"
+                  placeholder="BTC/USDT&#10;ETH/USDT&#10;SOL/USDT">{{ cfg.symbols | join('\n') }}</textarea>
+        <div class="form-text text-secondary">Örnek: BTC/USDT, ETH/USDT, SOL/USDT</div>
+      </div>
+    </div>
+
+    <!-- Fiyat Alarmları -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="bi bi-alarm me-2 text-danger"></i>Fiyat Alarmları
+      </div>
+      <div class="card-body">
+        <p class="text-secondary small">Boş bırakılan alanlar için alarm gönderilmez.</p>
+        {% for sym in cfg.symbols %}
+        {% set key = sym.replace("/", "_") %}
+        {% set al = cfg.price_alerts.get(sym, {}) %}
+        <div class="mb-3">
+          <label class="form-label fw-bold">{{ sym }}</label>
+          <div class="row g-2">
+            <div class="col-6">
+              <input type="number" name="alert_above_{{ key }}" class="form-control form-control-sm"
+                     placeholder="Üst limit ($)" step="any"
+                     value="{{ al.above if al.above is defined else '' }}">
+            </div>
+            <div class="col-6">
+              <input type="number" name="alert_below_{{ key }}" class="form-control form-control-sm"
+                     placeholder="Alt limit ($)" step="any"
+                     value="{{ al.below if al.below is defined else '' }}">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="d-flex gap-2 mt-2">
+  <button type="submit" class="btn btn-primary px-4">
+    <i class="bi bi-floppy"></i> Kaydet
+  </button>
+  <a href="/" class="btn btn-outline-secondary">İptal</a>
+</div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("chatIdLink").addEventListener("click", e => {
+  e.preventDefault();
+  document.getElementById("chatIdHelp").classList.toggle("d-none");
+});
+
+document.getElementById("btnTestTelegram").addEventListener("click", async () => {
+  const token   = document.querySelector('[name=telegram_token]').value.trim();
+  const chat_id = document.querySelector('[name=telegram_chat_id]').value.trim();
+  const result  = document.getElementById("testResult");
+  if (!token || !chat_id) {
+    result.textContent = "Token ve Chat ID boş olamaz.";
+    result.className = "ms-2 small text-danger";
+    return;
+  }
+  result.textContent = "Gönderiliyor…";
+  result.className = "ms-2 small text-secondary";
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({chat_id, text: "✅ Kripto Sinyal Botu bağlantısı başarılı!"})
+    });
+    const j = await r.json();
+    if (j.ok) {
+      result.textContent = "✅ Telegram'a ulaştı!";
+      result.className = "ms-2 small text-success";
+    } else {
+      result.textContent = "❌ " + (j.description || "Hata");
+      result.className = "ms-2 small text-danger";
+    }
+  } catch(e) {
+    result.textContent = "❌ Bağlantı hatası";
+    result.className = "ms-2 small text-danger";
+  }
+});
+</script>
+{% endblock %}

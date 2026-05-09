@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Durum Başlığı -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <span class="scanner-dot dot-off" id="scannerDot"></span>
+    <span id="scannerStatus" class="text-secondary">Durduruldu</span>
+    <small class="text-secondary" id="lastScan"></small>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-success btn-sm" id="btnStart">
+      <i class="bi bi-play-fill"></i> Başlat
+    </button>
+    <button class="btn btn-danger btn-sm" id="btnStop">
+      <i class="bi bi-stop-fill"></i> Durdur
+    </button>
+    <button class="btn btn-outline-secondary btn-sm" id="btnClear">
+      <i class="bi bi-trash"></i> Sinyalleri Temizle
+    </button>
+  </div>
+</div>
+
+<!-- Fiyat Kartları -->
+<div class="row g-3 mb-4" id="priceCards">
+  <div class="col-12 text-secondary text-center py-3" id="priceLoading">
+    <i class="bi bi-arrow-repeat"></i> Fiyatlar yükleniyor…
+  </div>
+</div>
+
+<!-- Sinyal Akışı -->
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span><i class="bi bi-bell-fill me-2 text-warning"></i>Sinyal Akışı</span>
+    <small class="text-secondary" id="signalCount"></small>
+  </div>
+  <div class="card-body p-0">
+    <div id="signalList" style="max-height:520px; overflow-y:auto;">
+      <div class="text-secondary text-center py-4" id="noSignal">
+        Henüz sinyal yok — scanner'ı başlatın.
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const EMOJI = { BUY: "🟢", SELL: "🔴", ALERT: "⚠️" };
+let knownSignals = 0;
+
+async function fetchJSON(url) {
+  const r = await fetch(url); return r.json();
+}
+
+async function refreshStatus() {
+  const s = await fetchJSON("/api/scanner/status");
+  const dot = document.getElementById("scannerDot");
+  const lbl = document.getElementById("scannerStatus");
+  const ls  = document.getElementById("lastScan");
+  if (s.running) {
+    dot.className = "scanner-dot dot-on";
+    lbl.textContent = "Çalışıyor";
+    lbl.className = "text-success";
+  } else {
+    dot.className = "scanner-dot dot-off";
+    lbl.textContent = "Durduruldu";
+    lbl.className = "text-secondary";
+  }
+  ls.textContent = s.last_scan ? `Son tarama: ${s.last_scan}` : "";
+  if (s.last_error) ls.textContent += ` | Hata: ${s.last_error}`;
+}
+
+async function refreshPrices() {
+  const prices = await fetchJSON("/api/prices");
+  const container = document.getElementById("priceCards");
+  const loading   = document.getElementById("priceLoading");
+  if (!Object.keys(prices).length) return;
+  loading && loading.remove();
+  container.innerHTML = "";
+  for (const [sym, data] of Object.entries(prices)) {
+    const chg = (data.change || 0).toFixed(2);
+    const chgClass = chg >= 0 ? "change-pos" : "change-neg";
+    const chgIcon  = chg >= 0 ? "▲" : "▼";
+    container.innerHTML += `
+      <div class="col-6 col-md-3">
+        <div class="card price-card p-3">
+          <div class="text-secondary small mb-1">${sym}</div>
+          <div class="fs-5 fw-bold">$${Number(data.price).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:6})}</div>
+          <div class="${chgClass} small">${chgIcon} ${chg}%</div>
+        </div>
+      </div>`;
+  }
+}
+
+async function refreshSignals() {
+  const signals = await fetchJSON("/api/signals");
+  const list    = document.getElementById("signalList");
+  const cnt     = document.getElementById("signalCount");
+  cnt.textContent = `${signals.length} sinyal`;
+  if (!signals.length) {
+    list.innerHTML = `<div class="text-secondary text-center py-4" id="noSignal">Henüz sinyal yok — scanner'ı başlatın.</div>`;
+    return;
+  }
+  list.innerHTML = signals.map(s => `
+    <div class="signal-row ${s.type} px-4 py-3 border-bottom border-secondary border-opacity-25 d-flex align-items-start gap-3">
+      <span class="fs-5">${EMOJI[s.type] || "ℹ️"}</span>
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge badge-${s.type.toLowerCase()}">${s.type}</span>
+          <strong>${s.symbol}</strong>
+          <span class="text-secondary small ms-auto">${s.time || ""}</span>
+        </div>
+        <div class="small text-secondary">${s.reason}</div>
+        <div class="small mt-1">
+          💰 <span class="fw-bold">$${Number(s.price).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:6})}</span>
+          ${s.rsi != null ? `&nbsp;|&nbsp; RSI: <span class="fw-bold">${s.rsi}</span>` : ""}
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+document.getElementById("btnStart").addEventListener("click", async () => {
+  await fetch("/api/scanner/start", {method:"POST"});
+  await refreshStatus();
+});
+document.getElementById("btnStop").addEventListener("click", async () => {
+  await fetch("/api/scanner/stop", {method:"POST"});
+  await refreshStatus();
+});
+document.getElementById("btnClear").addEventListener("click", async () => {
+  if (!confirm("Tüm sinyaller silinsin mi?")) return;
+  await fetch("/api/signals/clear", {method:"POST"});
+  await refreshSignals();
+});
+
+async function tick() {
+  await Promise.all([refreshStatus(), refreshPrices(), refreshSignals()]);
+}
+tick();
+setInterval(tick, 5000);
+</script>
+{% endblock %}
