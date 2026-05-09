@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+data_settings.json
+data_signals.json
+signals.log
