@@ -404,6 +404,32 @@ let positions=JSON.parse(localStorage.getItem("bfPos")||"[]");
 let closedTrades=JSON.parse(localStorage.getItem("bfClosed")||"[]");
 let marketData={};
 let prevOI={};
+let usdTry=0; // anlık USD/TRY kuru
+
+async function fetchUsdTry(){
+  try{
+    const r=await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json");
+    const j=await r.json();
+    usdTry=j.usd?.try||0;
+  }catch{
+    try{
+      // Yedek API
+      const r=await fetch("https://open.er-api.com/v6/latest/USD");
+      const j=await r.json();
+      usdTry=j.rates?.TRY||0;
+    }catch{}
+  }
+  // Pozisyon sekmesi açıksa yenile
+  if(document.getElementById("tab-pos").classList.contains("active"))renderPositions();
+}
+fetchUsdTry();
+setInterval(fetchUsdTry, 5*60*1000); // her 5 dakikada bir güncelle
+
+function tl(usdt){
+  if(!usdTry||!usdt&&usdt!==0)return"";
+  const val=usdt*usdTry;
+  return val.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})+" ₺";
+}
 
 function loadCfg(){try{return{...DEF,...JSON.parse(localStorage.getItem("bfCfg")||"{}")}}catch{return{...DEF}}}
 function saveCfg(){localStorage.setItem("bfCfg",JSON.stringify(CFG))}
@@ -1066,11 +1092,15 @@ function renderPositions(){
           </div>
         </div>
         <div class="d-flex justify-content-between align-items-baseline mb-1">
-          <span style="color:#6e7681;font-size:.75rem">Anlık P&L</span>
+          <div>
+            <div style="color:#6e7681;font-size:.72rem">Anlık P&L</div>
+            ${usdTry?`<div style="color:#484f58;font-size:.68rem">1$ = ${usdTry.toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</div>`:""}
+          </div>
           <div class="text-end">
             <div class="${pnlPos?"pos-pnl-pos":"pos-pnl-neg"}" style="font-size:1.1rem">
               ${pnlPos?"+":""}${pnlUSDT.toFixed(2)} USDT
             </div>
+            ${usdTry?`<div style="font-size:.82rem;font-weight:600;color:${pnlPos?"#3fb950":"#f85149"}">${pnlPos?"+":""}${tl(pnlUSDT)}</div>`:""}
             <div style="font-size:.75rem;color:${pnlPos?"#3fb950":"#f85149"}">
               ${pnlPos?"+":""}${pnlPct.toFixed(2)}%
             </div>
