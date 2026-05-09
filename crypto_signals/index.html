@@ -3,131 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kripto Sinyal Pro</title>
+<title>Bybit Futures Sinyal Pro</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th,li{color:inherit}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,sans-serif}
+a,span,div,p,label,small,h1,h2,h3,h4,h5,h6{color:inherit}
 
 /* NAV */
-.topnav{background:#161b22;border-bottom:1px solid #30363d;padding:.6rem 1.5rem;display:flex;align-items:center;gap:1.5rem}
-.brand{font-weight:700;font-size:1.1rem;color:#58a6ff;letter-spacing:.5px;text-decoration:none}
-.tab-btn{background:none;border:none;color:#8b949e;padding:.4rem .9rem;border-bottom:2px solid transparent;cursor:pointer;font-size:.9rem;transition:.2s}
+.topnav{background:#161b22;border-bottom:1px solid #30363d;padding:.65rem 1.5rem;display:flex;align-items:center;gap:1.5rem;position:sticky;top:0;z-index:100}
+.brand{font-weight:800;font-size:1rem;color:#58a6ff;letter-spacing:.5px;white-space:nowrap}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:#8b949e;padding:.35rem .85rem;cursor:pointer;font-size:.875rem;transition:.15s;white-space:nowrap}
 .tab-btn.active{color:#e6edf3;border-bottom-color:#58a6ff}
 .tab-btn:hover{color:#e6edf3}
 
+/* LAYOUT */
+.wrap{max-width:1500px;margin:0 auto;padding:1rem 1.25rem 3rem}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
 /* CARDS */
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;color:#c9d1d9}
-.card-header{background:#21262d;border-bottom:1px solid #30363d;border-radius:10px 10px 0 0!important;padding:.7rem 1rem;font-weight:600;font-size:.9rem;color:#e6edf3}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px}
+.card-header{background:#21262d;border-bottom:1px solid #30363d;border-radius:10px 10px 0 0!important;padding:.65rem 1rem;font-weight:600;font-size:.85rem;color:#e6edf3;display:flex;align-items:center;justify-content:space-between}
 
-/* FIYAT KARTLARI */
-.sym-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;transition:.2s;cursor:default}
-.sym-card:hover{border-color:#58a6ff;transform:translateY(-2px)}
-.sym-name{font-size:.8rem;color:#8b949e;font-weight:600;letter-spacing:.5px}
-.sym-price{font-size:1.25rem;font-weight:700;color:#e6edf3;margin:.2rem 0}
-.sym-change.pos{color:#3fb950}
-.sym-change.neg{color:#f85149}
-.sym-meta{display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
-.mini-badge{font-size:.7rem;padding:.15rem .5rem;border-radius:4px;font-weight:600;white-space:nowrap}
-.mb-bull{background:#1a3a1a;color:#3fb950;border:1px solid #2ea043}
-.mb-bear{background:#3a1a1a;color:#f85149;border:1px solid #da3633}
-.mb-neutral{background:#2a2a1a;color:#d29922;border:1px solid #9e6a03}
-.mb-rsi{background:#1a1f3a;color:#79c0ff;border:1px solid #1f6feb}
-.mb-vol{background:#2a1a3a;color:#d2a8ff;border:1px solid #8b56d4}
-
-/* SİNYAL */
-.signal-row{border-left:3px solid transparent;padding:1rem 1.25rem;border-bottom:1px solid #21262d;transition:.15s}
-.signal-row:hover{background:#1c2128}
-.signal-row.BUY{border-left-color:#2ea043}
-.signal-row.SELL{border-left-color:#f85149}
-.signal-row.ALERT{border-left-color:#d29922}
-.sig-type{font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:4px}
-.sig-type.BUY{background:#1a3a1a;color:#3fb950}
-.sig-type.SELL{background:#3a1a1a;color:#f85149}
-.sig-type.ALERT{background:#3a2a1a;color:#d29922}
-.sig-sym{font-weight:700;font-size:.95rem;color:#e6edf3}
-.sig-time{font-size:.75rem;color:#6e7681}
-.sig-reason{font-size:.82rem;color:#8b949e;margin:.3rem 0}
-.sig-meta{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.8rem;color:#8b949e}
-.sig-meta span{color:#c9d1d9}
-.stars{color:#d29922;font-size:.85rem;letter-spacing:1px}
-.sl-tp{font-size:.78rem;margin-top:.4rem;display:flex;gap:.6rem;flex-wrap:wrap}
-.sl{color:#f85149}.tp1{color:#3fb950}.tp2{color:#3fb950}.tp3{color:#3fb950}
+/* SEMBOL KARTI */
+.sym-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:.9rem;transition:.2s;cursor:default;height:100%}
+.sym-card:hover{border-color:#58a6ff40;background:#1c2128}
+.sym-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem}
+.sym-name{font-size:.75rem;color:#8b949e;font-weight:700;letter-spacing:.8px}
+.sym-st-long{font-size:.7rem;font-weight:700;background:#1a3a1a;color:#3fb950;border:1px solid #2ea043;border-radius:4px;padding:.1rem .45rem}
+.sym-st-short{font-size:.7rem;font-weight:700;background:#3a1a1a;color:#f85149;border:1px solid #da3633;border-radius:4px;padding:.1rem .45rem}
+.sym-price{font-size:1.15rem;font-weight:700;color:#e6edf3;margin-bottom:.15rem}
+.sym-chg.pos{color:#3fb950;font-size:.82rem}
+.sym-chg.neg{color:#f85149;font-size:.82rem}
+.sym-divider{border-top:1px solid #21262d;margin:.55rem 0}
+.sym-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.sym-lbl{font-size:.72rem;color:#6e7681}
+.sym-val{font-size:.78rem;font-weight:600;color:#c9d1d9}
+.fund-pos{color:#f85149}.fund-neg{color:#3fb950}.fund-zero{color:#d29922}
+.ls-bar{height:5px;border-radius:3px;background:#30363d;margin:.15rem 0;overflow:hidden;display:flex}
+.ls-long-fill{background:#3fb950;height:100%;border-radius:3px 0 0 3px;transition:.5s}
+.ls-short-fill{background:#f85149;height:100%;border-radius:0 3px 3px 0}
+.rsi-bar{height:4px;border-radius:2px;background:#30363d;margin:.15rem 0}
+.rsi-fill{height:4px;border-radius:2px;transition:.5s}
+.oi-up{color:#3fb950}.oi-dn{color:#f85149}.oi-flat{color:#8b949e}
 
 /* KONTROL */
-.ctrl-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:1rem 0 .5rem}
-.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ctrl-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:.75rem 0 .4rem}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
 .dot-on{background:#3fb950;animation:pulse 1.5s infinite}
 .dot-off{background:#6e7681}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.cnt-bar-wrap{height:3px;background:#21262d;border-radius:2px;margin-bottom:1rem}
-.cnt-bar{height:3px;background:#58a6ff;border-radius:2px;transition:width 1s linear;width:0%}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.cnt-track{height:2px;background:#21262d;border-radius:1px;margin-bottom:.75rem}
+.cnt-fill{height:2px;background:#58a6ff;border-radius:1px;transition:width 1s linear;width:0%}
 
-/* FORM */
-.form-control,.form-select,.form-control:focus,.form-select:focus{background:#0d1117;border:1px solid #30363d;color:#c9d1d9}
-.form-control:focus,.form-select:focus{border-color:#58a6ff;box-shadow:none}
+/* SİNYAL */
+.sig-list{max-height:560px;overflow-y:auto}
+.sig-list::-webkit-scrollbar{width:3px}
+.sig-list::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+.sig-row{padding:.85rem 1.1rem;border-bottom:1px solid #1c2128;border-left:3px solid transparent;transition:.15s;display:flex;gap:.75rem}
+.sig-row:hover{background:#1c2128}
+.sig-row.LONG{border-left-color:#2ea043}
+.sig-row.SHORT{border-left-color:#f85149}
+.sig-row.ALERT{border-left-color:#d29922}
+.sig-emoji{font-size:1.2rem;flex-shrink:0;margin-top:.05rem}
+.sig-body{flex:1;min-width:0}
+.sig-head{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.25rem}
+.sig-badge{font-size:.68rem;font-weight:700;padding:.18rem .5rem;border-radius:4px}
+.sig-badge.LONG{background:#1a3a1a;color:#3fb950}
+.sig-badge.SHORT{background:#3a1a1a;color:#f85149}
+.sig-badge.ALERT{background:#3a2a1a;color:#d29922}
+.sig-sym{font-weight:700;font-size:.9rem;color:#e6edf3}
+.sig-stars{color:#d29922;font-size:.82rem;letter-spacing:.5px}
+.sig-time{font-size:.72rem;color:#6e7681;margin-left:auto}
+.sig-reasons{font-size:.78rem;color:#8b949e;margin:.2rem 0;line-height:1.5}
+.sig-meta{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.75rem;color:#6e7681;margin-top:.25rem}
+.sig-meta b{color:#c9d1d9}
+.sig-sltp{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.35rem;font-size:.75rem}
+.sig-sl{color:#f85149}.sig-tp1{color:#3fb950}.sig-tp2{color:#58c973}.sig-tp3{color:#7ee0a0}
+
+/* AYARLAR */
+.form-control,.form-select{background:#0d1117;border:1px solid #30363d;color:#c9d1d9;font-size:.875rem}
+.form-control:focus,.form-select:focus{background:#0d1117;border-color:#58a6ff;color:#c9d1d9;box-shadow:none}
 .form-control::placeholder{color:#484f58}
-.form-label{color:#c9d1d9;font-size:.87rem;margin-bottom:.4rem}
-.form-text{color:#6e7681;font-size:.77rem}
-
-/* BUTONLAR */
-.btn-primary{background:#1f6feb;border-color:#1f6feb;color:#fff}
-.btn-success{background:#238636;border-color:#238636;color:#fff}
-.btn-danger{background:#da3633;border-color:#da3633;color:#fff}
-.btn-outline-secondary{border-color:#30363d;color:#8b949e}
-.btn-outline-secondary:hover{background:#21262d;color:#c9d1d9;border-color:#8b949e}
-.btn-outline-info{border-color:#1f6feb;color:#58a6ff}
-.btn-outline-info:hover{background:#1f3a6e;color:#79c0ff}
-.btn-sm{font-size:.8rem;padding:.3rem .7rem}
-
-/* ALERT KUTUSU */
-.info-box{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#8b949e;line-height:1.6}
+.form-label{color:#c9d1d9;font-size:.83rem;margin-bottom:.3rem}
+.form-text{color:#6e7681;font-size:.74rem;margin-top:.2rem}
+.info-box{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:.75rem 1rem;font-size:.8rem;color:#8b949e;line-height:1.6}
 .info-box strong{color:#c9d1d9}
-.info-box code{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:.1rem .3rem;color:#79c0ff;font-size:.8rem}
+.info-box code{background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:.08rem .3rem;color:#79c0ff;font-size:.77rem}
 
-/* SYM TAGS */
-.sym-tag{display:inline-flex;align-items:center;gap:.35rem;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:.2rem .6rem;font-size:.82rem;color:#c9d1d9}
-.sym-tag .rm{cursor:pointer;color:#6e7681;font-size:.8rem}
+/* PRESET BUTONLAR */
+.preset-btn{font-size:.74rem;padding:.2rem .55rem;border-radius:5px;background:#21262d;border:1px solid #30363d;color:#8b949e;cursor:pointer;transition:.15s}
+.preset-btn:hover{background:#30363d;color:#c9d1d9}
+
+/* SYM TAG */
+.sym-tag{display:inline-flex;align-items:center;gap:.3rem;background:#21262d;border:1px solid #30363d;border-radius:5px;padding:.18rem .55rem;font-size:.78rem;color:#c9d1d9}
+.sym-tag .rm{cursor:pointer;color:#6e7681;font-size:.75rem;line-height:1}
 .sym-tag .rm:hover{color:#f85149}
 
-/* SINYAL YOK */
-.empty-state{text-align:center;padding:3rem 1rem;color:#484f58}
-.empty-state i{font-size:2.5rem;display:block;margin-bottom:.75rem}
+/* BUTONLAR */
+.btn-success{background:#238636;border-color:#238636;color:#fff}
+.btn-danger{background:#da3633;border-color:#da3633;color:#fff}
+.btn-primary{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.btn-outline-secondary{border-color:#30363d;color:#8b949e}
+.btn-outline-secondary:hover{background:#21262d;color:#c9d1d9}
+.btn-outline-info{border-color:#1f6feb;color:#58a6ff}
+.btn-outline-info:hover{background:#1c2f52;color:#79c0ff}
+.btn-sm{font-size:.78rem;padding:.28rem .65rem}
 
-/* SCROLLBAR */
-#sigList{max-height:520px;overflow-y:auto}
-#sigList::-webkit-scrollbar{width:4px}
-#sigList::-webkit-scrollbar-track{background:#0d1117}
-#sigList::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+/* EMPTY */
+.empty{text-align:center;padding:2.5rem 1rem;color:#484f58}
+.empty i{font-size:2rem;display:block;margin-bottom:.6rem}
 
-.tab-pane{display:none}.tab-pane.active{display:block}
-.wrap{max-width:1400px;margin:0 auto;padding:0 1.25rem}
+/* BADGE */
+.bdg{font-size:.68rem;padding:.12rem .42rem;border-radius:4px;font-weight:600}
+.bdg-bull{background:#1a3a1a;color:#3fb950;border:1px solid #2ea04360}
+.bdg-bear{background:#3a1a1a;color:#f85149;border:1px solid #da363360}
+.bdg-neutral{background:#252a1a;color:#d29922;border:1px solid #9e6a0360}
+.bdg-info{background:#1a2a3a;color:#79c0ff;border:1px solid #1f6feb60}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <div class="topnav">
-  <a class="brand" href="#"><i class="bi bi-graph-up-arrow me-1"></i>Kripto Sinyal Pro</a>
-  <button class="tab-btn active" onclick="switchTab('dash',this)">
-    <i class="bi bi-speedometer2 me-1"></i>Dashboard
-  </button>
-  <button class="tab-btn" onclick="switchTab('settings',this)">
-    <i class="bi bi-gear me-1"></i>Ayarlar
-  </button>
+  <div class="brand"><i class="bi bi-bar-chart-fill me-1"></i>Bybit Futures Pro</div>
+  <button class="tab-btn active" onclick="switchTab('dash',this)"><i class="bi bi-speedometer2 me-1"></i>Dashboard</button>
+  <button class="tab-btn" onclick="switchTab('settings',this)"><i class="bi bi-gear me-1"></i>Ayarlar</button>
+  <div style="margin-left:auto;font-size:.75rem;color:#484f58" id="topStatus"></div>
 </div>
 
-<div class="wrap py-3">
+<div class="wrap">
 
-<!-- ═══════════ DASHBOARD ═══════════ -->
+<!-- ══════════ DASHBOARD ══════════ -->
 <div class="tab-pane active" id="tab-dash">
 
-  <!-- Kontrol -->
   <div class="ctrl-bar">
     <span class="dot dot-off" id="sDot"></span>
-    <span id="sLabel" style="color:#6e7681">Durduruldu</span>
+    <span id="sLabel" style="color:#6e7681;font-size:.875rem">Durduruldu</span>
     <small id="sNext" style="color:#6e7681"></small>
     <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
       <button class="btn btn-success btn-sm" id="btnStart"><i class="bi bi-play-fill"></i> Başlat</button>
@@ -136,103 +148,117 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th,li{color:inherit}
       <button class="btn btn-outline-secondary btn-sm" id="btnClear"><i class="bi bi-trash"></i> Temizle</button>
     </div>
   </div>
-  <div class="cnt-bar-wrap"><div class="cnt-bar" id="cntBar"></div></div>
+  <div class="cnt-track mb-3"><div class="cnt-fill" id="cntFill"></div></div>
 
-  <!-- Fiyat kartları -->
-  <div class="row g-3 mb-4" id="priceCards">
-    <div class="col-12 empty-state" style="padding:2rem">
-      <i class="bi bi-play-circle" style="font-size:1.8rem;color:#484f58"></i>
-      <div style="color:#6e7681;margin-top:.5rem">Başlat butonuna bas, veriler yüklensin</div>
+  <!-- Sembol kartları -->
+  <div class="row g-2 mb-3" id="priceCards">
+    <div class="col-12 empty" style="padding:1.5rem">
+      <i class="bi bi-play-circle" style="font-size:1.5rem"></i>
+      <div style="font-size:.85rem">Başlat butonuna bas — Bybit verisi yüklensin</div>
     </div>
   </div>
 
   <!-- Sinyal akışı -->
   <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header">
       <span><i class="bi bi-bell-fill me-2" style="color:#d29922"></i>Sinyal Akışı</span>
-      <small id="sigCount" style="color:#6e7681"></small>
+      <small id="sigCount" style="color:#6e7681;font-weight:400"></small>
     </div>
-    <div id="sigList">
-      <div class="empty-state">
-        <i class="bi bi-inbox"></i>
-        <div>Henüz sinyal yok — scanner'ı başlatın</div>
-      </div>
+    <div class="sig-list" id="sigList">
+      <div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.85rem">Henüz sinyal yok</div></div>
     </div>
   </div>
 
-</div><!-- /dash -->
+</div>
 
-<!-- ═══════════ AYARLAR ═══════════ -->
+<!-- ══════════ AYARLAR ══════════ -->
 <div class="tab-pane" id="tab-settings">
-<div class="row g-4 mt-0">
+<div class="row g-3 mt-0">
 
   <div class="col-lg-6">
 
     <!-- Telegram -->
-    <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-telegram me-2" style="color:#29b6f6"></i>Telegram Bildirimleri</div>
-      <div class="card-body">
+    <div class="card mb-3">
+      <div class="card-header"><span><i class="bi bi-telegram me-2" style="color:#29b6f6"></i>Telegram Bildirimleri</span></div>
+      <div class="card-body p-3">
         <div class="info-box mb-3">
-          <strong>Bot nasıl kurulur?</strong><br>
-          1. Telegram'da <code>@BotFather</code>'ı aç → <code>/newbot</code> yaz<br>
-          2. İsim ver → Token al → aşağıya yapıştır<br>
-          3. Kendi botuna <code>/start</code> yaz<br>
-          4. <strong>"Chat ID Otomatik Al"</strong> butonuna bas
+          <strong>Kurulum:</strong>&nbsp;
+          Telegram → <code>@BotFather</code> → <code>/newbot</code> → token al → botuna <code>/start</code> yaz → <strong>Otomatik Al</strong> butonu.
         </div>
-        <div class="mb-3">
-          <label class="form-label">Bot Token</label>
-          <input type="text" id="cfgToken" class="form-control font-monospace" placeholder="123456789:AAHxyz...">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Chat ID</label>
-          <div class="input-group">
-            <input type="text" id="cfgChat" class="form-control font-monospace" placeholder="123456789">
-            <button class="btn btn-outline-info" id="btnGetChat"><i class="bi bi-arrow-down-circle"></i> Otomatik Al</button>
+        <div class="row g-2 mb-2">
+          <div class="col-12">
+            <label class="form-label">Bot Token</label>
+            <input type="text" id="cfgToken" class="form-control form-control-sm font-monospace" placeholder="123456789:AAHxyz...">
           </div>
-          <div class="form-text">Bota /start yaz, sonra butona bas</div>
+          <div class="col-12">
+            <label class="form-label">Chat ID</label>
+            <div class="input-group input-group-sm">
+              <input type="text" id="cfgChat" class="form-control font-monospace" placeholder="123456789">
+              <button class="btn btn-outline-info btn-sm" id="btnGetChat"><i class="bi bi-arrow-down-circle"></i> Otomatik Al</button>
+            </div>
+          </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-outline-info btn-sm" id="btnTestTg"><i class="bi bi-send"></i> Test Gönder</button>
-          <span id="tgRes" style="font-size:.82rem"></span>
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <button class="btn btn-outline-info btn-sm" id="btnTestTg"><i class="bi bi-send"></i> Test</button>
+          <span id="tgRes" style="font-size:.8rem"></span>
         </div>
       </div>
     </div>
 
-    <!-- Tarama Ayarları -->
-    <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-sliders me-2" style="color:#d29922"></i>İndikatör & Tarama</div>
-      <div class="card-body">
-        <div class="row g-3">
+    <!-- İndikatör Ayarları -->
+    <div class="card mb-3">
+      <div class="card-header"><span><i class="bi bi-sliders me-2" style="color:#d29922"></i>İndikatör Ayarları</span></div>
+      <div class="card-body p-3">
+        <div class="row g-2">
           <div class="col-6">
             <label class="form-label">Zaman Dilimi</label>
-            <select id="cfgTf" class="form-select">
-              <option>1m</option><option>5m</option><option>15m</option>
-              <option>30m</option><option selected>1h</option><option>4h</option><option>1d</option>
+            <select id="cfgTf" class="form-select form-select-sm">
+              <option value="1">1 dakika</option>
+              <option value="5">5 dakika</option>
+              <option value="15">15 dakika</option>
+              <option value="30">30 dakika</option>
+              <option value="60" selected>1 saat</option>
+              <option value="240">4 saat</option>
+              <option value="D">1 gün</option>
             </select>
           </div>
           <div class="col-6">
             <label class="form-label">Tarama Aralığı (sn)</label>
-            <input type="number" id="cfgInt" class="form-control" value="60" min="10">
+            <input type="number" id="cfgInt" class="form-control form-control-sm" value="60" min="15">
           </div>
-          <div class="col-6">
-            <label class="form-label">RSI Aşırı Satım</label>
-            <input type="number" id="cfgOs" class="form-control" value="30">
+          <div class="col-4">
+            <label class="form-label">RSI Satım</label>
+            <input type="number" id="cfgOs" class="form-control form-control-sm" value="30">
           </div>
-          <div class="col-6">
-            <label class="form-label">RSI Aşırı Alım</label>
-            <input type="number" id="cfgOb" class="form-control" value="70">
+          <div class="col-4">
+            <label class="form-label">RSI Alım</label>
+            <input type="number" id="cfgOb" class="form-control form-control-sm" value="70">
           </div>
-          <div class="col-6">
+          <div class="col-4">
+            <label class="form-label">ATR Çarpanı</label>
+            <input type="number" id="cfgAtr" class="form-control form-control-sm" value="1.5" step="0.1">
+          </div>
+          <div class="col-4">
             <label class="form-label">EMA Hızlı</label>
-            <input type="number" id="cfgEmaF" class="form-control" value="50">
+            <input type="number" id="cfgEmaF" class="form-control form-control-sm" value="50">
+          </div>
+          <div class="col-4">
+            <label class="form-label">EMA Yavaş</label>
+            <input type="number" id="cfgEmaS" class="form-control form-control-sm" value="200">
+          </div>
+          <div class="col-4">
+            <label class="form-label">Supertrend Çarpan</label>
+            <input type="number" id="cfgStMult" class="form-control form-control-sm" value="3" step="0.5">
           </div>
           <div class="col-6">
-            <label class="form-label">EMA Yavaş</label>
-            <input type="number" id="cfgEmaS" class="form-control" value="200">
+            <label class="form-label">Funding Alarm (uzun) %</label>
+            <input type="number" id="cfgFundHigh" class="form-control form-control-sm" value="0.05" step="0.01">
+            <div class="form-text">Bu üstü → piyasa çok long → SHORT fırsatı</div>
           </div>
-          <div class="col-12">
-            <label class="form-label">ATR SL Çarpanı <small style="color:#6e7681">(SL = fiyat ± ATR×çarpan)</small></label>
-            <input type="number" id="cfgAtr" class="form-control" value="1.5" step="0.1" min="0.5" max="5">
+          <div class="col-6">
+            <label class="form-label">Funding Alarm (kısa) %</label>
+            <input type="number" id="cfgFundLow" class="form-control form-control-sm" value="-0.05" step="0.01">
+            <div class="form-text">Bu altı → piyasa çok short → LONG fırsatı</div>
           </div>
         </div>
       </div>
@@ -243,113 +269,150 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th,li{color:inherit}
   <div class="col-lg-6">
 
     <!-- Semboller -->
-    <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>İzlenen Semboller</div>
-      <div class="card-body">
-        <div id="symTags" class="d-flex flex-wrap gap-2 mb-3"></div>
-        <div class="input-group">
-          <input type="text" id="symIn" class="form-control" placeholder="BTCUSDT veya BTC/USDT">
+    <div class="card mb-3">
+      <div class="card-header"><span><i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>İzlenen Semboller</span></div>
+      <div class="card-body p-3">
+        <div id="symTags" class="d-flex flex-wrap gap-1 mb-2" style="min-height:32px"></div>
+        <div class="input-group input-group-sm mb-2">
+          <input type="text" id="symIn" class="form-control font-monospace" placeholder="BTCUSDT">
           <button class="btn btn-outline-info" id="btnAddSym"><i class="bi bi-plus-lg"></i> Ekle</button>
         </div>
-        <div class="form-text">Enter veya Ekle butonuna bas</div>
+        <!-- Preset hızlı ekleme -->
+        <div class="mb-1" style="font-size:.75rem;color:#6e7681;margin-bottom:.4rem">Hızlı Ekle:</div>
+        <div class="d-flex flex-wrap gap-1" id="presetBtns"></div>
       </div>
     </div>
 
     <!-- Fiyat Alarmları -->
-    <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-alarm me-2" style="color:#f85149"></i>Fiyat Alarmları</div>
-      <div class="card-body">
-        <p style="font-size:.82rem;color:#6e7681">Boş bırakılan alanlar için alarm gelmez.</p>
-        <div id="alertFields"></div>
+    <div class="card mb-3">
+      <div class="card-header"><span><i class="bi bi-alarm me-2" style="color:#f85149"></i>Fiyat Alarmları</span></div>
+      <div class="card-body p-3">
+        <p style="font-size:.78rem;color:#6e7681;margin-bottom:.75rem">Boş bırakılan alanlar için alarm gelmez.</p>
+        <div id="alertFields" style="max-height:250px;overflow-y:auto"></div>
       </div>
     </div>
 
-    <!-- Konfluens Açıklaması -->
+    <!-- Konfluens açıklama -->
     <div class="info-box">
-      <strong>⭐ Konfluens Skoru Nedir?</strong><br>
-      Bir sinyalin kaç farklı indikatör tarafından onaylandığını gösterir.<br>
-      <strong style="color:#3fb950">⭐⭐⭐⭐⭐</strong> = RSI + MACD + BB + Trend + Hacim hepsi uyuşuyor → çok güçlü<br>
-      <strong style="color:#f85149">⭐</strong> = Sadece tek indikatörden → zayıf, dikkatli ol
+      <strong>⭐ Konfluens & Sinyal Mantığı</strong><br>
+      <strong style="color:#3fb950">LONG</strong> için: RSI satım + StochRSI çapraz + MACD ↑ + Supertrend LONG + BB alt kırılım + Funding yüksek (kontrarian)<br>
+      <strong style="color:#f85149">SHORT</strong> için: RSI alım + StochRSI ↓ + MACD ↓ + Supertrend SHORT + BB üst kırılım + L/S oranı aşırı long<br>
+      <strong>5 yıldız</strong> = 5+ onay → güçlü pozisyon | <strong>1-2 yıldız</strong> = zayıf, bekle
     </div>
-
   </div>
+
 </div>
 
 <div class="d-flex align-items-center gap-3 mt-3">
-  <button class="btn btn-primary px-4" id="btnSave"><i class="bi bi-floppy"></i> Kaydet</button>
-  <span id="saveMsg" style="font-size:.85rem"></span>
+  <button class="btn btn-primary btn-sm px-4" id="btnSave"><i class="bi bi-floppy"></i> Kaydet</button>
+  <span id="saveMsg" style="font-size:.82rem"></span>
+</div>
 </div>
 
-</div><!-- /settings -->
 </div><!-- /wrap -->
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  CONFIG
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 const DEF={
-  symbols:["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT"],
-  timeframe:"1h", interval:60,
+  symbols:["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT","BNBUSDT","DOGEUSDT","AVAXUSDT","LINKUSDT"],
+  timeframe:"60", interval:60,
   rsiOs:30, rsiOb:70,
   emaFast:50, emaSlow:200,
-  atrMult:1.5,
+  atrMult:1.5, stMult:3,
+  fundHigh:0.05, fundLow:-0.05,
   token:"", chatId:"",
   alerts:{}
 };
+const PRESETS={
+  "🔝 Top 10":["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT","BNBUSDT","DOGEUSDT","ADAUSDT","AVAXUSDT","DOTUSDT","LINKUSDT"],
+  "🏦 DeFi":["UNIUSDT","AAVEUSDT","GMXUSDT","DYDXUSDT","PENDLEUSDT","CRVUSDT","LDOUSDT","JUPUSDT"],
+  "⚡ Layer1":["NEARUSDT","APTUSDT","SUIUSDT","ATOMUSDT","TIAUSDT","INJUSDT","SEIUSDT","FTMUSDT"],
+  "🔷 Layer2":["ARBUSDT","OPUSDT","MATICUSDT","STRKUSDT","ZKUSDT","MANTAUSDT"],
+  "🐸 Meme":["PEPEUSDT","WIFUSDT","BONKUSDT","SHIBUSDT","FLOKIUSDT","MEMEUSDT"],
+  "₿ BTC Ekosistemi":["ORDIUSDT","RUNEUSDT","STXUSDT"],
+  "🤖 AI":["FETUSDT","AGIXUSDT","RENDERUSDT","WLDUSDT","TAODT"]
+};
 
 let CFG=loadCfg();
-let signals=JSON.parse(localStorage.getItem("kSigs")||"[]");
+let signals=JSON.parse(localStorage.getItem("bfSigs")||"[]");
+let prevOI={};
 
 function loadCfg(){
-  try{const s=JSON.parse(localStorage.getItem("kCfg")||"{}");return{...DEF,...s};}catch{return{...DEF};}
+  try{return{...DEF,...JSON.parse(localStorage.getItem("bfCfg")||"{}")}}catch{return{...DEF}}
 }
-function saveCfg(){localStorage.setItem("kCfg",JSON.stringify(CFG));}
-function saveSigs(){localStorage.setItem("kSigs",JSON.stringify(signals.slice(0,300)));}
+function saveCfg(){localStorage.setItem("bfCfg",JSON.stringify(CFG))}
+function saveSigs(){localStorage.setItem("bfSigs",JSON.stringify(signals.slice(0,300)))}
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  TABS
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function switchTab(id,btn){
   document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+id).classList.add("active");
   btn.classList.add("active");
-  if(id==="settings") loadSettingsUI();
+  if(id==="settings")loadSettingsUI();
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  İNDİKATÖRLER
-// ═══════════════════════════════════════════
-function calcEMA(arr,span){
-  const k=2/(span+1);let e=arr[0];
-  return arr.map((v,i)=>{if(i===0){e=v;}else{e=v*k+e*(1-k);}return e;});
+// ═══════════════════════════════════════════════
+function sma(arr,n){
+  const out=new Array(n-1).fill(null);
+  for(let i=n-1;i<arr.length;i++){
+    out.push(arr.slice(i-n+1,i+1).reduce((a,b)=>a+b,0)/n);
+  }
+  return out;
 }
 
-function calcRSI(closes,period=14){
+function ema(arr,span){
+  const k=2/(span+1);let e=arr[0];
+  return arr.map((v,i)=>{if(i===0){e=v}else{e=v*k+e*(1-k)}return e});
+}
+
+// RSI series (full)
+function rsiSeries(closes,period=14){
+  const out=new Array(period).fill(null);
   let ag=0,al=0;
-  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>0)ag+=d;else al-=d;}
+  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>0)ag+=d;else al-=d}
   ag/=period;al/=period;
+  out.push(al===0?100:100-(100/(1+ag/al)));
   for(let i=period+1;i<closes.length;i++){
     const d=closes[i]-closes[i-1];
     ag=(ag*(period-1)+(d>0?d:0))/period;
     al=(al*(period-1)+(d<0?-d:0))/period;
+    out.push(al===0?100:100-(100/(1+ag/al)));
   }
-  return al===0?100:100-(100/(1+ag/al));
+  return out;
 }
 
-function calcMACD(closes){
-  const fast=calcEMA(closes,12),slow=calcEMA(closes,26);
-  const ml=fast.map((v,i)=>v-slow[i]);
-  const sl=calcEMA(ml,9);
-  return{ml,sl,hist:ml.map((v,i)=>v-sl[i])};
+// StochRSI → {K, D} arrays
+function stochRSI(closes,rsiP=14,stochP=14,kP=3,dP=3){
+  const rs=rsiSeries(closes,rsiP).filter(v=>v!==null);
+  const stoch=[];
+  for(let i=stochP-1;i<rs.length;i++){
+    const sl=rs.slice(i-stochP+1,i+1);
+    const mn=Math.min(...sl),mx=Math.max(...sl);
+    stoch.push(mx===mn?50:(rs[i]-mn)/(mx-mn)*100);
+  }
+  const K=sma(stoch,kP).filter(v=>v!==null);
+  const D=sma(K,dP).filter(v=>v!==null);
+  return{K,D};
 }
 
-function calcBB(closes,per=20,mult=2){
+function macd(closes){
+  const mLine=ema(closes,12).map((v,i)=>v-ema(closes,26)[i]);
+  const sig=ema(mLine,9);
+  return{ml:mLine,sl:sig,hist:mLine.map((v,i)=>v-sig[i])};
+}
+
+function bollinger(closes,per=20,mult=2){
   const n=closes.length-1;
-  const sl=closes.slice(n-per+1,n+1);
-  const mid=sl.reduce((a,b)=>a+b,0)/per;
-  const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/per);
+  const sl=closes.slice(Math.max(0,n-per+1),n+1);
+  const mid=sl.reduce((a,b)=>a+b,0)/sl.length;
+  const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/sl.length);
   return{upper:mid+mult*std,mid,lower:mid-mult*std};
 }
 
@@ -359,203 +422,297 @@ function calcATR(klines,period=14){
     const h=klines[i].h,l=klines[i].l,pc=klines[i-1].c;
     trs.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)));
   }
-  return trs.slice(-period).reduce((a,b)=>a+b,0)/period;
+  const r=trs.slice(-period);
+  return r.reduce((a,b)=>a+b,0)/r.length;
+}
+
+// Supertrend → last direction: 1=LONG, -1=SHORT
+function supertrend(klines,mult=3,period=10){
+  if(klines.length<period+2)return 0;
+  // ATR (Wilder)
+  const trs=[];
+  for(let i=1;i<klines.length;i++){
+    const h=klines[i].h,l=klines[i].l,pc=klines[i-1].c;
+    trs.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)));
+  }
+  let atr=trs.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  const atrs=[atr];
+  for(let i=period;i<trs.length;i++){atr=(atr*(period-1)+trs[i])/period;atrs.push(atr);}
+
+  let dir=1,ub=0,lb=0;
+  for(let i=0;i<atrs.length;i++){
+    const idx=i+1;
+    if(idx>=klines.length)break;
+    const hl2=(klines[idx].h+klines[idx].l)/2;
+    const newUB=hl2+mult*atrs[i];
+    const newLB=hl2-mult*atrs[i];
+    if(i>0){
+      ub=klines[idx].c>ub?Math.min(newUB,ub):newUB;
+      lb=klines[idx].c<lb?Math.max(newLB,lb):newLB;
+    }else{ub=newUB;lb=newLB;}
+    if(i>0){
+      if(dir===1&&klines[idx].c<lb)dir=-1;
+      else if(dir===-1&&klines[idx].c>ub)dir=1;
+    }
+  }
+  return dir;
+}
+
+// RSI Diverjans (son N mum)
+function divergence(closes,rsis,lookback=14){
+  const pc=closes.slice(-lookback);
+  const pr=rsis.filter(v=>v!==null).slice(-lookback);
+  if(pr.length<4)return{bull:false,bear:false};
+  const pHH=pc[pc.length-1]>Math.max(...pc.slice(0,-3));
+  const rLH=pr[pr.length-1]<Math.max(...pr.slice(0,-3));
+  const pLL=pc[pc.length-1]<Math.min(...pc.slice(0,-3));
+  const rHL=pr[pr.length-1]>Math.min(...pr.slice(0,-3));
+  return{bull:pLL&&rHL, bear:pHH&&rLH};
 }
 
 function avgVol(klines,period=20){
   const vols=klines.slice(-period).map(k=>k.v);
-  return vols.reduce((a,b)=>a+b,0)/period;
+  return vols.reduce((a,b)=>a+b,0)/vols.length;
 }
 
-// ═══════════════════════════════════════════
-//  BİNANCE
-// ═══════════════════════════════════════════
-function ns(s){return s.replace("/","").toUpperCase();}
+// ═══════════════════════════════════════════════
+//  BYBIT API
+// ═══════════════════════════════════════════════
+const BASE="https://api.bybit.com/v5";
 
-async function fetchKlines(sym,tf,limit=210){
-  const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${ns(sym)}&interval=${tf}&limit=${limit}`);
+async function fetchKlines(sym,interval,limit=210){
+  const r=await fetch(`${BASE}/market/kline?category=linear&symbol=${sym}&interval=${interval}&limit=${limit}`);
   if(!r.ok)throw new Error(r.status);
-  return(await r.json()).map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+  const j=await r.json();
+  if(j.retCode!==0)throw new Error(j.retMsg);
+  // Bybit returns newest first → reverse
+  return j.result.list.reverse().map(k=>({t:+k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
 }
 
 async function fetchTicker(sym){
-  const r=await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ns(sym)}`);
+  const r=await fetch(`${BASE}/market/tickers?category=linear&symbol=${sym}`);
   if(!r.ok)throw new Error(r.status);
-  return r.json();
+  const j=await r.json();
+  return j.result.list[0];
 }
 
-// ═══════════════════════════════════════════
+async function fetchLSRatio(sym){
+  try{
+    const r=await fetch(`${BASE}/market/account-ratio?category=linear&symbol=${sym}&period=1h&limit=1`);
+    const j=await r.json();
+    if(j.retCode===0&&j.result.list.length){
+      return{long:+j.result.list[0].buyRatio,short:+j.result.list[0].sellRatio};
+    }
+  }catch{}
+  return null;
+}
+
+// ═══════════════════════════════════════════════
 //  TELEGRAM
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 async function tgSend(text){
   if(!CFG.token||!CFG.chatId)return;
-  try{await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
-    method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({chat_id:CFG.chatId,text,parse_mode:"Markdown"})
-  });}catch(e){console.warn("TG:",e);}
+  try{
+    await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:CFG.chatId,text,parse_mode:"Markdown"})
+    });
+  }catch{}
+}
+async function tgGetChatId(tok){
+  try{
+    const j=await(await fetch(`https://api.telegram.org/bot${tok}/getUpdates`)).json();
+    return j.result?.find(u=>u.message?.chat?.id)?.message?.chat?.id?.toString()||null;
+  }catch{return null}
 }
 
-async function tgGetChatId(token){
-  const r=await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
-  const j=await r.json();
-  return j.result?.find(u=>u.message?.chat?.id)?.message?.chat?.id?.toString()||null;
-}
-
-// ═══════════════════════════════════════════
-//  TARAMA & ANALİZ
-// ═══════════════════════════════════════════
-let prices={};
-const EMOJI={BUY:"🟢",SELL:"🔴",ALERT:"⚠️"};
-const STARS=["","⭐","⭐⭐","⭐⭐⭐","⭐⭐⭐⭐","⭐⭐⭐⭐⭐"];
-
-function fmtPrice(p){
+// ═══════════════════════════════════════════════
+//  FORMAT
+// ═══════════════════════════════════════════════
+function fp(p){
+  if(p>=10000)return p.toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1});
   if(p>=100)return p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-  if(p>=1)return p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
+  if(p>=1)return p.toLocaleString("en-US",{minimumFractionDigits:3,maximumFractionDigits:4});
   return p.toLocaleString("en-US",{minimumFractionDigits:4,maximumFractionDigits:6});
 }
+const STARS=["","⭐","⭐⭐","⭐⭐⭐","⭐⭐⭐⭐","⭐⭐⭐⭐⭐"];
+const EMOJI={LONG:"🟢",SHORT:"🔴",ALERT:"⚠️"};
 
+// ═══════════════════════════════════════════════
+//  PIYASA VERİSİ (UI için)
+// ═══════════════════════════════════════════════
+let marketData={};
+
+// ═══════════════════════════════════════════════
+//  ANALİZ
+// ═══════════════════════════════════════════════
 async function analyzeSymbol(sym){
-  const [klines,ticker]=await Promise.all([fetchKlines(sym,CFG.timeframe,210),fetchTicker(sym)]);
+  const[klines,ticker,lsRatio]=await Promise.all([
+    fetchKlines(sym,CFG.timeframe,210),
+    fetchTicker(sym),
+    fetchLSRatio(sym)
+  ]);
+
   const price=+ticker.lastPrice;
-  const chgPct=+ticker.priceChangePercent;
+  const chgPct=+ticker.price24hPcnt*100;
+  const fundingRate=+ticker.fundingRate*100; // % olarak
+  const oi=+ticker.openInterest;
+
   const closes=klines.map(k=>k.c);
   const n=closes.length-1;
 
   // İndikatörler
-  const rsi=calcRSI(closes);
-  const {ml,sl,hist}=calcMACD(closes);
-  const bb=calcBB(closes);
+  const rs=rsiSeries(closes,14);
+  const lastRsi=rs[n]??50;
+  const{K:stK,D:stD}=stochRSI(closes);
+  const{ml,sl:mSig,hist}=macd(closes);
+  const bb=bollinger(closes);
   const atr=calcATR(klines);
-  const emaF=calcEMA(closes,CFG.emaFast);
-  const emaS=calcEMA(closes,CFG.emaSlow);
-  const volAvg=avgVol(klines);
+  const emaF=ema(closes,CFG.emaFast);
+  const emaS=ema(closes,CFG.emaSlow);
+  const stDir=supertrend(klines,+CFG.stMult||3);
+  const{bull:bullDiv,bear:bearDiv}=divergence(closes,rs);
+  const vAvg=avgVol(klines);
   const lastVol=klines[n].v;
-  const volRatio=lastVol/volAvg;
-
-  // Trend
-  const emaFLast=emaF[n],emaSLast=emaS[n];
-  const trend=price>emaFLast&&emaFLast>emaSLast?"BULL":price<emaFLast&&emaFLast<emaSLast?"BEAR":"NEUTRAL";
+  const volRatio=lastVol/vAvg;
   const highVol=volRatio>1.5;
 
-  // Genel kanı için sembol kartı verisi
-  prices[ns(sym)]={price,chgPct,rsi,trend,volRatio,emaF:emaFLast,emaS:emaSLast,
-    macdHist:hist[n],bb,atr};
+  // Trend
+  const trend=price>emaF[n]&&emaF[n]>emaS[n]?"BULL":price<emaF[n]&&emaF[n]<emaS[n]?"BEAR":"NEUTRAL";
 
-  // ─ Sinyal üret ─
-  const slMult=CFG.atrMult;
+  // OI değişim
+  let oiChange=null;
+  if(prevOI[sym]){oiChange=((oi-prevOI[sym])/prevOI[sym]*100);}
+  prevOI[sym]=oi;
 
-  function makeSignal(type,reasons,extraScore=0){
-    const score=Math.min(5,reasons.length+extraScore);
-    let sl,tp1,tp2,tp3;
-    if(type==="BUY"){
-      sl=price-slMult*atr; tp1=price+slMult*atr; tp2=price+2*slMult*atr; tp3=price+3*slMult*atr;
-    }else if(type==="SELL"){
-      sl=price+slMult*atr; tp1=price-slMult*atr; tp2=price-2*slMult*atr; tp3=price-3*slMult*atr;
-    }else{sl=tp1=tp2=tp3=null;}
-    return{symbol:ns(sym),type,reasons,score,price:fmtPrice(price),rawPrice:price,
-      rsi:rsi.toFixed(1),trend,volRatio:volRatio.toFixed(1),
-      sl:sl?fmtPrice(sl):null,tp1:tp1?fmtPrice(tp1):null,
-      tp2:tp2?fmtPrice(tp2):null,tp3:tp3?fmtPrice(tp3):null,
+  // StochRSI çapraz
+  const stochN=stK.length-1;
+  const stochCrossUp=stochN>0&&stK[stochN-1]<stD[stochN-1]&&stK[stochN]>stD[stochN]&&stK[stochN]<25;
+  const stochCrossDn=stochN>0&&stK[stochN-1]>stD[stochN-1]&&stK[stochN]<stD[stochN]&&stK[stochN]>75;
+
+  // MACD
+  const macdCrossUp=n>0&&ml[n-1]<mSig[n-1]&&ml[n]>mSig[n];
+  const macdCrossDn=n>0&&ml[n-1]>mSig[n-1]&&ml[n]<mSig[n];
+  const macdMomUp=hist[n]>0&&hist[n]>hist[n-1]&&hist[n-1]>hist[n-2];
+  const macdMomDn=hist[n]<0&&hist[n]<hist[n-1]&&hist[n-1]<hist[n-2];
+
+  // Funding kontrarian
+  const fundLong=fundingRate>+CFG.fundHigh;  // çok long → short fırsatı
+  const fundShort=fundingRate<+CFG.fundLow;  // çok short → long fırsatı
+
+  // L/S kontrarian
+  const lsLong=lsRatio&&lsRatio.long>0.65;   // %65+ long → short
+  const lsShort=lsRatio&&lsRatio.short>0.60; // %60+ short → long
+
+  // Market verisi kaydet
+  marketData[sym]={price,chgPct,fundingRate,oi,oiChange,lsRatio,
+    rsi:lastRsi,stochK:stK[stochN]??50,trend,stDir,volRatio,atr};
+
+  // ─── Sinyal üret ───
+  const longR=[],shortR=[];
+
+  if(lastRsi<CFG.rsiOs)longR.push(`RSI aşırı satım (${lastRsi.toFixed(1)})`);
+  if(lastRsi>CFG.rsiOb)shortR.push(`RSI aşırı alım (${lastRsi.toFixed(1)})`);
+  if(stochCrossUp)longR.push(`StochRSI yukarı çapraz (${stK[stochN].toFixed(0)})`);
+  if(stochCrossDn)shortR.push(`StochRSI aşağı çapraz (${stK[stochN].toFixed(0)})`);
+  if(macdCrossUp)longR.push("MACD yukarı kesişim");
+  if(macdCrossDn)shortR.push("MACD aşağı kesişim");
+  if(macdMomUp)longR.push("MACD momentumu güçleniyor");
+  if(macdMomDn)shortR.push("MACD momentumu zayıflıyor");
+  if(price<bb.lower)longR.push(`Alt Bollinger kırıldı ($${fp(bb.lower)})`);
+  if(price>bb.upper)shortR.push(`Üst Bollinger kırıldı ($${fp(bb.upper)})`);
+  if(stDir===1)longR.push("Supertrend LONG sinyali");
+  if(stDir===-1)shortR.push("Supertrend SHORT sinyali");
+  if(trend==="BULL")longR.push("EMA trendi yukarı");
+  if(trend==="BEAR")shortR.push("EMA trendi aşağı");
+  if(highVol&&longR.length)longR.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
+  if(highVol&&shortR.length)shortR.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
+  if(fundShort)longR.push(`Funding negatif (${fundingRate.toFixed(3)}%) → short sıkışması riski`);
+  if(fundLong)shortR.push(`Funding çok yüksek (${fundingRate.toFixed(3)}%) → long sıkışması riski`);
+  if(lsShort)longR.push(`L/S oranı %${(lsRatio.short*100).toFixed(0)} short → kontrarian long`);
+  if(lsLong)shortR.push(`L/S oranı %${(lsRatio.long*100).toFixed(0)} long → kontrarian short`);
+  if(bullDiv)longR.push("Bullish RSI diverjansı tespit edildi");
+  if(bearDiv)shortR.push("Bearish RSI diverjansı tespit edildi");
+  if(oiChange!==null&&oiChange>3&&longR.length)longR.push(`OI artıyor (+${oiChange.toFixed(1)}%) → trend güçlü`);
+  if(oiChange!==null&&oiChange>3&&shortR.length)shortR.push(`OI artıyor (+${oiChange.toFixed(1)}%) → trend güçlü`);
+  if(oiChange!==null&&oiChange<-3&&longR.length)longR.push(`OI azalıyor (${oiChange.toFixed(1)}%) → trend zayıflıyor`);
+
+  const generated=[];
+  const m=+CFG.atrMult||1.5;
+
+  function mkSig(type,reasons){
+    const score=Math.min(5,reasons.length);
+    let slp,tp1p,tp2p,tp3p;
+    if(type==="LONG"){slp=price-m*atr;tp1p=price+m*atr;tp2p=price+2*m*atr;tp3p=price+3*m*atr;}
+    else if(type==="SHORT"){slp=price+m*atr;tp1p=price-m*atr;tp2p=price-2*m*atr;tp3p=price-3*m*atr;}
+    else{slp=tp1p=tp2p=tp3p=null;}
+    const slPct=slp?Math.abs((slp-price)/price*100).toFixed(2):null;
+    return{symbol:sym,type,reasons,score,price:fp(price),rawPrice:price,
+      rsi:lastRsi.toFixed(1),trend,stDir,fundingRate:fundingRate.toFixed(3),
+      volRatio:volRatio.toFixed(1),
+      lsLong:lsRatio?(lsRatio.long*100).toFixed(0):null,
+      sl:slp?fp(slp):null,slPct,tp1:tp1p?fp(tp1p):null,
+      tp2:tp2p?fp(tp2p):null,tp3:tp3p?fp(tp3p):null,
       time:new Date().toLocaleTimeString("tr-TR")};
   }
 
-  // BUY sinyalleri topla
-  const buyReasons=[];
-  const sellReasons=[];
-
-  if(rsi<CFG.rsiOs)buyReasons.push(`RSI aşırı satım (${rsi.toFixed(1)})`);
-  if(rsi>CFG.rsiOb)sellReasons.push(`RSI aşırı alım (${rsi.toFixed(1)})`);
-
-  // MACD kesişim (son 2 mum)
-  const macdCrossUp=ml[n-1]<sl[n-1]&&ml[n]>sl[n];
-  const macdCrossDn=ml[n-1]>sl[n-1]&&ml[n]<sl[n];
-  if(macdCrossUp)buyReasons.push("MACD yukarı kesişim");
-  if(macdCrossDn)sellReasons.push("MACD aşağı kesişim");
-
-  // MACD histogram momentum
-  if(hist[n]>0&&hist[n]>hist[n-1]&&hist[n-1]>hist[n-2])buyReasons.push("MACD momentumu artıyor");
-  if(hist[n]<0&&hist[n]<hist[n-1]&&hist[n-1]<hist[n-2])sellReasons.push("MACD momentumu düşüyor");
-
-  // Bollinger
-  if(price<bb.lower)buyReasons.push(`Alt BB kırıldı (${fmtPrice(bb.lower)})`);
-  if(price>bb.upper)sellReasons.push(`Üst BB kırıldı (${fmtPrice(bb.upper)})`);
-
-  // EMA trend
-  if(trend==="BULL")buyReasons.push("EMA trendi yukarı (Boğa)");
-  if(trend==="BEAR")sellReasons.push("EMA trendi aşağı (Ayı)");
-  if(trend==="NEUTRAL"&&buyReasons.length)buyReasons.push("Trend nötr");
-  if(trend==="NEUTRAL"&&sellReasons.length)sellReasons.push("Trend nötr");
-
-  // Hacim onayı
-  if(highVol&&buyReasons.length) buyReasons.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
-  if(highVol&&sellReasons.length)sellReasons.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
-
-  const generated=[];
-
-  // Sadece 2+ konfluens olan sinyaller üret (tek indikatör gürültü)
-  if(buyReasons.length>=2) generated.push(makeSignal("BUY",buyReasons));
-  else if(buyReasons.length===1) generated.push(makeSignal("BUY",buyReasons)); // yine de göster, düşük skor
-
-  if(sellReasons.length>=2) generated.push(makeSignal("SELL",sellReasons));
-  else if(sellReasons.length===1) generated.push(makeSignal("SELL",sellReasons));
+  if(longR.length>0)generated.push(mkSig("LONG",longR));
+  if(shortR.length>0)generated.push(mkSig("SHORT",shortR));
 
   // Fiyat alarmları
-  const al=CFG.alerts[ns(sym)]||{};
-  if(al.above&&price>al.above)
-    generated.push(makeSignal("ALERT",[`Fiyat hedef ${fmtPrice(al.above)} üstüne çıktı`]));
-  if(al.below&&price<al.below)
-    generated.push(makeSignal("ALERT",[`Fiyat hedef ${fmtPrice(al.below)} altına düştü`]));
+  const al=CFG.alerts[sym]||{};
+  if(al.above&&price>al.above)generated.push(mkSig("ALERT",[`Hedef $${fp(al.above)} üstüne çıktı`]));
+  if(al.below&&price<al.below)generated.push(mkSig("ALERT",[`Hedef $${fp(al.below)} altına düştü`]));
 
-  // Kaydet & bildir
+  // Kaydet & Telegram
   for(const sig of generated){
     signals.unshift(sig);
     const em=EMOJI[sig.type]||"ℹ️";
-    const rsLine=sig.reasons.map(r=>`• ${r}`).join("\n");
+    const rStr=sig.reasons.map(r=>`• ${r}`).join("\n");
     tgSend(
-      `${em} *${sig.type}* — ${sig.symbol} ${STARS[sig.score]||""}\n`+
-      `💰 Fiyat: \`${sig.price}\`\n`+
-      `📊 RSI: \`${sig.rsi}\`  |  Trend: ${sig.trend}\n`+
-      (sig.sl?`🛑 SL: \`${sig.sl}\`\n`+
-               `🎯 TP1: \`${sig.tp1}\` | TP2: \`${sig.tp2}\` | TP3: \`${sig.tp3}\`\n`:"")+
-      `\n${rsLine}`
+      `${em} *${sig.type}* ${STARS[sig.score]||""} — \`${sig.symbol}\`\n`+
+      `💰 Fiyat: \`$${sig.price}\`  |  RSI: \`${sig.rsi}\`\n`+
+      `📡 Funding: \`${sig.fundingRate}%\`  |  Trend: \`${sig.trend}\`\n`+
+      (sig.sl?`🛑 SL: \`$${sig.sl}\` (%${sig.slPct})\n`+
+               `🎯 TP1: \`$${sig.tp1}\` | TP2: \`$${sig.tp2}\` | TP3: \`$${sig.tp3}\`\n`:"")+
+      `\n${rStr}`
     );
   }
-
   saveSigs();
   return generated;
 }
 
 async function scanAll(){
-  const tasks=CFG.symbols.map(s=>analyzeSymbol(s).catch(e=>{console.error(s,e);return[];}));
-  const results=await Promise.all(tasks);
+  document.getElementById("topStatus").textContent="Tarıyor…";
+  const tasks=CFG.symbols.map(s=>analyzeSymbol(s).catch(e=>{console.error(s,e);return[]}));
+  await Promise.all(tasks);
   renderPrices();
   renderSignals();
+  document.getElementById("topStatus").textContent=`Son: ${new Date().toLocaleTimeString("tr-TR")}`;
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  ZAMANLAYICI
-// ═══════════════════════════════════════════
-let timer=null,cntTimer=null,cntLeft=0;
-
+// ═══════════════════════════════════════════════
+let timer=null,cntTmr=null,cntLeft=0;
 function startScanner(){
   if(timer)return;
-  scanAll();
-  cntLeft=CFG.interval;
+  scanAll();cntLeft=CFG.interval;
   timer=setInterval(()=>{scanAll();cntLeft=CFG.interval;},CFG.interval*1000);
-  cntTimer=setInterval(()=>{
+  cntTmr=setInterval(()=>{
     cntLeft=Math.max(0,cntLeft-1);
-    document.getElementById("cntBar").style.width=((1-cntLeft/CFG.interval)*100)+"%";
+    document.getElementById("cntFill").style.width=((1-cntLeft/CFG.interval)*100)+"%";
     document.getElementById("sNext").textContent=cntLeft>0?`Sonraki: ${cntLeft}s`:"Tarıyor…";
   },1000);
-  setRunning(true);
+  setRun(true);
 }
 function stopScanner(){
-  clearInterval(timer);clearInterval(cntTimer);timer=null;cntTimer=null;
-  document.getElementById("cntBar").style.width="0%";
+  clearInterval(timer);clearInterval(cntTmr);timer=null;cntTmr=null;
+  document.getElementById("cntFill").style.width="0%";
   document.getElementById("sNext").textContent="";
-  setRunning(false);
+  setRun(false);
 }
-function setRunning(on){
+function setRun(on){
   document.getElementById("sDot").className="dot "+(on?"dot-on":"dot-off");
   const lbl=document.getElementById("sLabel");
   lbl.textContent=on?"Çalışıyor":"Durduruldu";
@@ -564,131 +721,148 @@ function setRunning(on){
   document.getElementById("btnStop").disabled=!on;
 }
 
-// ═══════════════════════════════════════════
-//  RENDER — FİYATLAR
-// ═══════════════════════════════════════════
-function trendBadge(t){
-  if(t==="BULL")return`<span class="mini-badge mb-bull">▲ YUKARI</span>`;
-  if(t==="BEAR")return`<span class="mini-badge mb-bear">▼ AŞAĞI</span>`;
-  return`<span class="mini-badge mb-neutral">→ YATAY</span>`;
-}
-function rsiColor(r){return r<35?"#3fb950":r>65?"#f85149":"#c9d1d9";}
-function sentiment(d){
-  // trend + rsi + macd kombinasyonu
-  let s=0;
-  if(d.trend==="BULL")s++;if(d.trend==="BEAR")s--;
-  if(d.rsi<45)s++;if(d.rsi>55)s--;
-  if(d.macdHist>0)s++;if(d.macdHist<0)s--;
-  if(s>=2)return`<span class="mini-badge mb-bull">AL</span>`;
-  if(s<=-2)return`<span class="mini-badge mb-bear">SAT</span>`;
-  return`<span class="mini-badge mb-neutral">BEKLE</span>`;
-}
+// ═══════════════════════════════════════════════
+//  RENDER — SEMBOL KARTLARI
+// ═══════════════════════════════════════════════
+function fundColor(f){return f>0.05?"#f85149":f<-0.05?"#3fb950":f<0?"#58c973":"#d29922"}
+function rsiColor(r){return r<35?"#3fb950":r>65?"#f85149":r<45?"#79c0ff":"#c9d1d9"}
 
 function renderPrices(){
   const wrap=document.getElementById("priceCards");
-  if(!Object.keys(prices).length)return;
+  if(!Object.keys(marketData).length)return;
   wrap.innerHTML="";
-  for(const[sym,d]of Object.entries(prices)){
+  for(const[sym,d]of Object.entries(marketData)){
     const pos=d.chgPct>=0;
+    const stBadge=d.stDir===1
+      ?`<span class="sym-st-long">↑ LONG</span>`
+      :d.stDir===-1?`<span class="sym-st-short">↓ SHORT</span>`
+      :`<span style="font-size:.68rem;color:#8b949e">─ NÖTR</span>`;
+    const tBadge=d.trend==="BULL"?`<span class="bdg bdg-bull">▲ BULL</span>`
+      :d.trend==="BEAR"?`<span class="bdg bdg-bear">▼ BEAR</span>`
+      :`<span class="bdg bdg-neutral">→ YATAY</span>`;
+    const fc=fundColor(d.fundingRate);
+    const fundStr=`<span style="color:${fc}">${d.fundingRate>0?"+":""}${d.fundingRate.toFixed(3)}%</span>`;
+    const lsPct=d.lsRatio?`${(d.lsRatio.long*100).toFixed(0)}% L / ${(d.lsRatio.short*100).toFixed(0)}% S`:"-";
+    const lsLongW=d.lsRatio?d.lsRatio.long*100:50;
+    const oiStr=d.oiChange!==null
+      ?`<span class="${d.oiChange>1?"oi-up":d.oiChange<-1?"oi-dn":"oi-flat"}">${d.oiChange>0?"+":""}${d.oiChange.toFixed(1)}%</span>`
+      :`<span class="oi-flat">-</span>`;
+    const rsiW=Math.min(100,Math.max(0,d.rsi));
+    const rsiC=rsiColor(d.rsi);
+
     wrap.innerHTML+=`
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
       <div class="sym-card">
-        <div class="sym-name">${sym}</div>
-        <div class="sym-price">$${fmtPrice(d.price)}</div>
-        <div class="sym-change ${pos?"pos":"neg"}">${pos?"▲":"▼"} ${Math.abs(d.chgPct).toFixed(2)}%</div>
-        <div class="sym-meta">
-          ${trendBadge(d.trend)}
-          <span class="mini-badge mb-rsi" style="color:${rsiColor(d.rsi)}">RSI ${d.rsi.toFixed(0)}</span>
-          <span class="mini-badge mb-vol">Hcm ×${d.volRatio.toFixed(1)}</span>
-          ${sentiment(d)}
+        <div class="sym-top"><span class="sym-name">${sym.replace("USDT","")}/USDT</span>${stBadge}</div>
+        <div class="sym-price">$${fp(d.price)}</div>
+        <div class="sym-chg ${pos?"pos":"neg"}">${pos?"▲":"▼"} ${Math.abs(d.chgPct).toFixed(2)}%</div>
+        <div class="sym-divider"></div>
+        <div class="sym-row"><span class="sym-lbl">Trend</span>${tBadge}</div>
+        <div class="sym-row"><span class="sym-lbl">RSI <span style="color:${rsiC}">${d.rsi.toFixed(0)}</span></span>
+          <div style="width:80px"><div class="rsi-bar"><div class="rsi-fill" style="width:${rsiW}%;background:${rsiC}"></div></div></div>
         </div>
+        <div class="sym-row"><span class="sym-lbl">Funding</span><span class="sym-val">${fundStr}</span></div>
+        <div class="sym-row"><span class="sym-lbl">L/S</span><span class="sym-val" style="font-size:.72rem">${lsPct}</span></div>
+        <div class="ls-bar"><div class="ls-long-fill" style="width:${lsLongW}%"></div><div class="ls-short-fill" style="width:${100-lsLongW}%"></div></div>
+        <div class="sym-row"><span class="sym-lbl">OI Δ</span><span class="sym-val">${oiStr}</span></div>
+        <div class="sym-row"><span class="sym-lbl">Hacim</span><span class="sym-val" style="color:${d.volRatio>1.5?"#d2a8ff":"#8b949e}"}">×${d.volRatio.toFixed(1)}</span></div>
       </div>
     </div>`;
   }
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  RENDER — SİNYALLER
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function renderSignals(){
   const list=document.getElementById("sigList");
-  const cnt=document.getElementById("sigCount");
-  cnt.textContent=signals.length?signals.length+" sinyal":"";
+  document.getElementById("sigCount").textContent=signals.length?signals.length+" sinyal":"";
   if(!signals.length){
-    list.innerHTML=`<div class="empty-state"><i class="bi bi-inbox"></i><div>Henüz sinyal yok — scanner'ı başlatın</div></div>`;
+    list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.85rem">Henüz sinyal yok</div></div>`;
     return;
   }
   list.innerHTML=signals.map(s=>{
-    const reasons=Array.isArray(s.reasons)?s.reasons.join(" • "):s.reasons||s.reason||"";
+    const reasons=Array.isArray(s.reasons)?s.reasons.join(" • "):(s.reason||"");
     const sltp=s.sl?`
-      <div class="sl-tp">
-        <span class="sl">🛑 SL: $${s.sl}</span>
-        <span class="tp1">🎯 TP1: $${s.tp1}</span>
-        <span class="tp2">TP2: $${s.tp2}</span>
-        <span class="tp3">TP3: $${s.tp3}</span>
-      </div>`:"";
-    return`
-    <div class="signal-row ${s.type}">
-      <div style="display:flex;align-items:flex-start;gap:.75rem">
-        <span style="font-size:1.2rem;margin-top:.1rem">${EMOJI[s.type]||"ℹ️"}</span>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem">
-            <span class="sig-type ${s.type}">${s.type}</span>
-            <span class="sig-sym">${s.symbol}</span>
-            <span class="stars">${STARS[s.score]||""}</span>
-            <span class="sig-time" style="margin-left:auto">${s.time||""}</span>
-          </div>
-          <div class="sig-reason">${reasons}</div>
-          <div class="sig-meta">
-            <span>💰 <span>$${s.price}</span></span>
-            <span>RSI <span>${s.rsi}</span></span>
-            <span>Trend <span>${s.trend}</span></span>
-            <span>Hcm ×<span>${s.volRatio||"-"}</span></span>
-          </div>
-          ${sltp}
+      <div class="sig-sltp">
+        <span class="sig-sl">🛑 SL $${s.sl} (%${s.slPct})</span>
+        <span class="sig-tp1">🎯 TP1 $${s.tp1}</span>
+        <span class="sig-tp2">TP2 $${s.tp2}</span>
+        <span class="sig-tp3">TP3 $${s.tp3}</span>
+      </div>`:""
+    const fc=s.fundingRate?fundColor(+s.fundingRate):"#8b949e";
+    return`<div class="sig-row ${s.type}">
+      <span class="sig-emoji">${EMOJI[s.type]||"ℹ️"}</span>
+      <div class="sig-body">
+        <div class="sig-head">
+          <span class="sig-badge ${s.type}">${s.type}</span>
+          <span class="sig-sym">${s.symbol}</span>
+          <span class="sig-stars">${STARS[Math.min(5,s.score||1)]}</span>
+          <span class="sig-time">${s.time||""}</span>
         </div>
+        <div class="sig-reasons">${reasons}</div>
+        <div class="sig-meta">
+          <span>💰 <b>$${s.price}</b></span>
+          <span>RSI <b style="color:${rsiColor(+s.rsi)}">${s.rsi}</b></span>
+          <span>Trend <b>${s.trend||"-"}</b></span>
+          ${s.fundingRate?`<span>Funding <b style="color:${fc}">${s.fundingRate}%</b></span>`:""}
+          ${s.lsLong?`<span>L/S <b>${s.lsLong}%</b> long</span>`:""}
+          <span>Hcm <b>×${s.volRatio||"-"}</b></span>
+        </div>
+        ${sltp}
       </div>
-    </div>`;
-  }).join("");
+    </div>`}).join("");
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  AYARLAR UI
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 function renderSymTags(){
   const w=document.getElementById("symTags");
-  w.innerHTML=CFG.symbols.map(s=>`
-    <span class="sym-tag">${ns(s)}<span class="rm" data-s="${ns(s)}">✕</span></span>`).join("");
+  w.innerHTML=CFG.symbols.map(s=>
+    `<span class="sym-tag">${s}<span class="rm" data-s="${s}">✕</span></span>`).join("");
   w.querySelectorAll(".rm").forEach(el=>el.addEventListener("click",()=>{
-    CFG.symbols=CFG.symbols.filter(x=>ns(x)!==el.dataset.s);
-    renderSymTags();renderAlertFields();
+    CFG.symbols=CFG.symbols.filter(x=>x!==el.dataset.s);renderSymTags();renderAlertFields();
   }));
 }
 
 function renderAlertFields(){
   document.getElementById("alertFields").innerHTML=CFG.symbols.map(s=>{
-    const sym=ns(s);const al=CFG.alerts[sym]||{};
-    return`<div class="mb-3">
-      <label class="form-label" style="font-weight:600">${sym}</label>
-      <div class="row g-2">
-        <div class="col-6"><input type="number" class="form-control form-control-sm aa" data-sym="${sym}" placeholder="Üst limit ($)" step="any" value="${al.above||""}"></div>
-        <div class="col-6"><input type="number" class="form-control form-control-sm ab" data-sym="${sym}" placeholder="Alt limit ($)" step="any" value="${al.below||""}"></div>
-      </div>
-    </div>`;
+    const al=CFG.alerts[s]||{};
+    return`<div class="mb-2">
+      <label class="form-label" style="font-size:.78rem;font-weight:600">${s}</label>
+      <div class="row g-1">
+        <div class="col-6"><input type="number" class="form-control form-control-sm aa" data-s="${s}" placeholder="Üst $" step="any" value="${al.above||""}"></div>
+        <div class="col-6"><input type="number" class="form-control form-control-sm ab" data-s="${s}" placeholder="Alt $" step="any" value="${al.below||""}"></div>
+      </div></div>`;
   }).join("");
+}
+
+function renderPresets(){
+  const w=document.getElementById("presetBtns");
+  w.innerHTML=Object.entries(PRESETS).map(([label,coins])=>
+    `<button class="preset-btn" data-coins='${JSON.stringify(coins)}'>${label}</button>`).join("");
+  w.querySelectorAll(".preset-btn").forEach(btn=>btn.addEventListener("click",()=>{
+    const coins=JSON.parse(btn.dataset.coins);
+    coins.forEach(c=>{if(!CFG.symbols.includes(c))CFG.symbols.push(c);});
+    renderSymTags();renderAlertFields();
+  }));
 }
 
 function loadSettingsUI(){
   document.getElementById("cfgToken").value=CFG.token||"";
   document.getElementById("cfgChat").value=CFG.chatId||"";
-  document.getElementById("cfgTf").value=CFG.timeframe||"1h";
+  document.getElementById("cfgTf").value=CFG.timeframe||"60";
   document.getElementById("cfgInt").value=CFG.interval||60;
   document.getElementById("cfgOs").value=CFG.rsiOs||30;
   document.getElementById("cfgOb").value=CFG.rsiOb||70;
+  document.getElementById("cfgAtr").value=CFG.atrMult||1.5;
   document.getElementById("cfgEmaF").value=CFG.emaFast||50;
   document.getElementById("cfgEmaS").value=CFG.emaSlow||200;
-  document.getElementById("cfgAtr").value=CFG.atrMult||1.5;
-  renderSymTags();renderAlertFields();
+  document.getElementById("cfgStMult").value=CFG.stMult||3;
+  document.getElementById("cfgFundHigh").value=CFG.fundHigh||0.05;
+  document.getElementById("cfgFundLow").value=CFG.fundLow||-0.05;
+  renderSymTags();renderAlertFields();renderPresets();
 }
 
 function collectSettings(){
@@ -698,23 +872,26 @@ function collectSettings(){
   CFG.interval=+document.getElementById("cfgInt").value||60;
   CFG.rsiOs=+document.getElementById("cfgOs").value||30;
   CFG.rsiOb=+document.getElementById("cfgOb").value||70;
+  CFG.atrMult=+document.getElementById("cfgAtr").value||1.5;
   CFG.emaFast=+document.getElementById("cfgEmaF").value||50;
   CFG.emaSlow=+document.getElementById("cfgEmaS").value||200;
-  CFG.atrMult=+document.getElementById("cfgAtr").value||1.5;
+  CFG.stMult=+document.getElementById("cfgStMult").value||3;
+  CFG.fundHigh=+document.getElementById("cfgFundHigh").value||0.05;
+  CFG.fundLow=+document.getElementById("cfgFundLow").value||-0.05;
   CFG.alerts={};
-  document.querySelectorAll(".aa").forEach(el=>{if(el.value){CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{};CFG.alerts[el.dataset.sym].above=+el.value;}});
-  document.querySelectorAll(".ab").forEach(el=>{if(el.value){CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{};CFG.alerts[el.dataset.sym].below=+el.value;}});
+  document.querySelectorAll(".aa").forEach(el=>{if(el.value){(CFG.alerts[el.dataset.s]=CFG.alerts[el.dataset.s]||{}).above=+el.value}});
+  document.querySelectorAll(".ab").forEach(el=>{if(el.value){(CFG.alerts[el.dataset.s]=CFG.alerts[el.dataset.s]||{}).below=+el.value}});
 }
 
 function addSym(raw){
-  const s=ns(raw.trim());
-  if(!s||CFG.symbols.map(ns).includes(s))return;
+  const s=raw.trim().toUpperCase();
+  if(!s||CFG.symbols.includes(s))return;
   CFG.symbols.push(s);renderSymTags();renderAlertFields();
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  OLAYLAR
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 document.getElementById("btnStart").addEventListener("click",startScanner);
 document.getElementById("btnStop").addEventListener("click",stopScanner);
 document.getElementById("btnNow").addEventListener("click",scanAll);
@@ -743,24 +920,24 @@ document.getElementById("btnTestTg").addEventListener("click",async()=>{
   try{
     const r=await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({chat_id:CFG.chatId,text:"✅ Kripto Sinyal Pro bağlantısı başarılı!"})
+      body:JSON.stringify({chat_id:CFG.chatId,text:"✅ Bybit Futures Pro aktif ve çalışıyor!"})
     });
     const j=await r.json();
     if(j.ok){res.textContent="✅ Telegram'a ulaştı";res.style.color="#3fb950";}
     else{res.textContent="❌ "+j.description;res.style.color="#f85149";}
-  }catch(e){res.textContent="❌ Hata";res.style.color="#f85149";}
+  }catch{res.textContent="❌ Bağlantı hatası";res.style.color="#f85149";}
 });
 document.getElementById("btnGetChat").addEventListener("click",async()=>{
   const tok=document.getElementById("cfgToken").value.trim();
   if(!tok){alert("Önce token gir, sonra bota /start yaz.");return;}
   const id=await tgGetChatId(tok);
   if(id)document.getElementById("cfgChat").value=id;
-  else alert("Chat ID bulunamadı.\nBotuna /start yazıp tekrar dene.");
+  else alert("Chat ID bulunamadı.\nBotuna /start yaz, sonra tekrar dene.");
 });
 
-// ═══════════════════════════════════════════
-//  BAŞLAT
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
 renderSignals();
 </script>
 </body>
