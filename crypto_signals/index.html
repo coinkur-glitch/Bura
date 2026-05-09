@@ -3,153 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kripto Sinyal Botu</title>
+<title>Kripto Sinyal Pro</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-  body{background:#0d1117;color:#e6edf3;font-family:'Segoe UI',system-ui,sans-serif}
-  .navbar{background:#161b22!important;border-bottom:1px solid #30363d}
-  .navbar-brand{font-weight:700;letter-spacing:1px;color:#58a6ff!important}
-  .card{background:#161b22;border:1px solid #30363d;border-radius:12px}
-  .card-header{background:#21262d;border-bottom:1px solid #30363d;border-radius:12px 12px 0 0!important;padding:.75rem 1rem}
-  .price-card{transition:transform .15s;cursor:default}
-  .price-card:hover{transform:translateY(-3px);border-color:#58a6ff!important}
-  .badge-buy{background:#1a7f4a}
-  .badge-sell{background:#8b1a1a}
-  .badge-alert{background:#7f5a1a}
-  .signal-row{border-left:3px solid transparent;transition:background .2s}
-  .signal-row:hover{background:#21262d}
-  .signal-row.BUY{border-color:#2ea043}
-  .signal-row.SELL{border-color:#f85149}
-  .signal-row.ALERT{border-color:#d29922}
-  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
-  .dot-on{background:#2ea043;animation:pulse 1.5s infinite}
-  .dot-off{background:#6e7681}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  .change-pos{color:#2ea043}
-  .change-neg{color:#f85149}
-  .form-control,.form-select{background:#0d1117;border:1px solid #30363d;color:#e6edf3}
-  .form-control:focus,.form-select:focus{background:#0d1117;border-color:#58a6ff;color:#e6edf3;box-shadow:none}
-  .form-control::placeholder{color:#6e7681}
-  .tab-content{padding:1.5rem 0}
-  .nav-tabs{border-bottom:1px solid #30363d}
-  .nav-tabs .nav-link{color:#8b949e;border:none;border-bottom:2px solid transparent;border-radius:0;padding:.5rem 1rem}
-  .nav-tabs .nav-link.active{color:#e6edf3;background:transparent;border-bottom-color:#58a6ff}
-  .nav-tabs .nav-link:hover{color:#e6edf3;border-bottom-color:#30363d}
-  #signalList{max-height:500px;overflow-y:auto}
-  .countdown-bar{height:3px;background:#58a6ff;transition:width 1s linear;border-radius:2px}
-  .sym-tag{display:inline-flex;align-items:center;gap:.4rem;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:.25rem .6rem;font-size:.85rem}
-  .sym-tag .remove{cursor:pointer;color:#6e7681}
-  .sym-tag .remove:hover{color:#f85149}
-  small.hint{color:#6e7681;font-size:.78rem}
+*{box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th,li{color:inherit}
+
+/* NAV */
+.topnav{background:#161b22;border-bottom:1px solid #30363d;padding:.6rem 1.5rem;display:flex;align-items:center;gap:1.5rem}
+.brand{font-weight:700;font-size:1.1rem;color:#58a6ff;letter-spacing:.5px;text-decoration:none}
+.tab-btn{background:none;border:none;color:#8b949e;padding:.4rem .9rem;border-bottom:2px solid transparent;cursor:pointer;font-size:.9rem;transition:.2s}
+.tab-btn.active{color:#e6edf3;border-bottom-color:#58a6ff}
+.tab-btn:hover{color:#e6edf3}
+
+/* CARDS */
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;color:#c9d1d9}
+.card-header{background:#21262d;border-bottom:1px solid #30363d;border-radius:10px 10px 0 0!important;padding:.7rem 1rem;font-weight:600;font-size:.9rem;color:#e6edf3}
+
+/* FIYAT KARTLARI */
+.sym-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:1rem;transition:.2s;cursor:default}
+.sym-card:hover{border-color:#58a6ff;transform:translateY(-2px)}
+.sym-name{font-size:.8rem;color:#8b949e;font-weight:600;letter-spacing:.5px}
+.sym-price{font-size:1.25rem;font-weight:700;color:#e6edf3;margin:.2rem 0}
+.sym-change.pos{color:#3fb950}
+.sym-change.neg{color:#f85149}
+.sym-meta{display:flex;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
+.mini-badge{font-size:.7rem;padding:.15rem .5rem;border-radius:4px;font-weight:600;white-space:nowrap}
+.mb-bull{background:#1a3a1a;color:#3fb950;border:1px solid #2ea043}
+.mb-bear{background:#3a1a1a;color:#f85149;border:1px solid #da3633}
+.mb-neutral{background:#2a2a1a;color:#d29922;border:1px solid #9e6a03}
+.mb-rsi{background:#1a1f3a;color:#79c0ff;border:1px solid #1f6feb}
+.mb-vol{background:#2a1a3a;color:#d2a8ff;border:1px solid #8b56d4}
+
+/* SİNYAL */
+.signal-row{border-left:3px solid transparent;padding:1rem 1.25rem;border-bottom:1px solid #21262d;transition:.15s}
+.signal-row:hover{background:#1c2128}
+.signal-row.BUY{border-left-color:#2ea043}
+.signal-row.SELL{border-left-color:#f85149}
+.signal-row.ALERT{border-left-color:#d29922}
+.sig-type{font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:4px}
+.sig-type.BUY{background:#1a3a1a;color:#3fb950}
+.sig-type.SELL{background:#3a1a1a;color:#f85149}
+.sig-type.ALERT{background:#3a2a1a;color:#d29922}
+.sig-sym{font-weight:700;font-size:.95rem;color:#e6edf3}
+.sig-time{font-size:.75rem;color:#6e7681}
+.sig-reason{font-size:.82rem;color:#8b949e;margin:.3rem 0}
+.sig-meta{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.8rem;color:#8b949e}
+.sig-meta span{color:#c9d1d9}
+.stars{color:#d29922;font-size:.85rem;letter-spacing:1px}
+.sl-tp{font-size:.78rem;margin-top:.4rem;display:flex;gap:.6rem;flex-wrap:wrap}
+.sl{color:#f85149}.tp1{color:#3fb950}.tp2{color:#3fb950}.tp3{color:#3fb950}
+
+/* KONTROL */
+.ctrl-bar{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;padding:1rem 0 .5rem}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot-on{background:#3fb950;animation:pulse 1.5s infinite}
+.dot-off{background:#6e7681}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.cnt-bar-wrap{height:3px;background:#21262d;border-radius:2px;margin-bottom:1rem}
+.cnt-bar{height:3px;background:#58a6ff;border-radius:2px;transition:width 1s linear;width:0%}
+
+/* FORM */
+.form-control,.form-select,.form-control:focus,.form-select:focus{background:#0d1117;border:1px solid #30363d;color:#c9d1d9}
+.form-control:focus,.form-select:focus{border-color:#58a6ff;box-shadow:none}
+.form-control::placeholder{color:#484f58}
+.form-label{color:#c9d1d9;font-size:.87rem;margin-bottom:.4rem}
+.form-text{color:#6e7681;font-size:.77rem}
+
+/* BUTONLAR */
+.btn-primary{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.btn-success{background:#238636;border-color:#238636;color:#fff}
+.btn-danger{background:#da3633;border-color:#da3633;color:#fff}
+.btn-outline-secondary{border-color:#30363d;color:#8b949e}
+.btn-outline-secondary:hover{background:#21262d;color:#c9d1d9;border-color:#8b949e}
+.btn-outline-info{border-color:#1f6feb;color:#58a6ff}
+.btn-outline-info:hover{background:#1f3a6e;color:#79c0ff}
+.btn-sm{font-size:.8rem;padding:.3rem .7rem}
+
+/* ALERT KUTUSU */
+.info-box{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#8b949e;line-height:1.6}
+.info-box strong{color:#c9d1d9}
+.info-box code{background:#0d1117;border:1px solid #30363d;border-radius:4px;padding:.1rem .3rem;color:#79c0ff;font-size:.8rem}
+
+/* SYM TAGS */
+.sym-tag{display:inline-flex;align-items:center;gap:.35rem;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:.2rem .6rem;font-size:.82rem;color:#c9d1d9}
+.sym-tag .rm{cursor:pointer;color:#6e7681;font-size:.8rem}
+.sym-tag .rm:hover{color:#f85149}
+
+/* SINYAL YOK */
+.empty-state{text-align:center;padding:3rem 1rem;color:#484f58}
+.empty-state i{font-size:2.5rem;display:block;margin-bottom:.75rem}
+
+/* SCROLLBAR */
+#sigList{max-height:520px;overflow-y:auto}
+#sigList::-webkit-scrollbar{width:4px}
+#sigList::-webkit-scrollbar-track{background:#0d1117}
+#sigList::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+
+.tab-pane{display:none}.tab-pane.active{display:block}
+.wrap{max-width:1400px;margin:0 auto;padding:0 1.25rem}
 </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg mb-0">
-  <div class="container-fluid px-4">
-    <span class="navbar-brand"><i class="bi bi-graph-up-arrow me-2"></i>Kripto Sinyal</span>
-    <ul class="nav nav-tabs border-0 ms-4" id="mainTabs">
-      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabDash">
-        <i class="bi bi-speedometer2"></i> Dashboard
-      </a></li>
-      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSettings">
-        <i class="bi bi-gear"></i> Ayarlar
-      </a></li>
-    </ul>
-  </div>
-</nav>
+<!-- NAV -->
+<div class="topnav">
+  <a class="brand" href="#"><i class="bi bi-graph-up-arrow me-1"></i>Kripto Sinyal Pro</a>
+  <button class="tab-btn active" onclick="switchTab('dash',this)">
+    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+  </button>
+  <button class="tab-btn" onclick="switchTab('settings',this)">
+    <i class="bi bi-gear me-1"></i>Ayarlar
+  </button>
+</div>
 
-<div class="container-fluid px-4 pb-5">
-<div class="tab-content">
+<div class="wrap py-3">
 
-<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
-<div class="tab-pane fade show active" id="tabDash">
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="tab-pane active" id="tab-dash">
 
-  <!-- Kontrol satırı -->
-  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
-    <span class="dot dot-off" id="scanDot"></span>
-    <span id="scanLabel" class="text-secondary">Durduruldu</span>
-    <small id="scanNext" class="text-secondary"></small>
-    <div class="ms-auto d-flex gap-2">
+  <!-- Kontrol -->
+  <div class="ctrl-bar">
+    <span class="dot dot-off" id="sDot"></span>
+    <span id="sLabel" style="color:#6e7681">Durduruldu</span>
+    <small id="sNext" style="color:#6e7681"></small>
+    <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
       <button class="btn btn-success btn-sm" id="btnStart"><i class="bi bi-play-fill"></i> Başlat</button>
       <button class="btn btn-danger btn-sm" id="btnStop" disabled><i class="bi bi-stop-fill"></i> Durdur</button>
-      <button class="btn btn-outline-secondary btn-sm" id="btnScanNow"><i class="bi bi-arrow-repeat"></i> Şimdi Tara</button>
+      <button class="btn btn-outline-secondary btn-sm" id="btnNow"><i class="bi bi-arrow-repeat"></i> Şimdi Tara</button>
       <button class="btn btn-outline-secondary btn-sm" id="btnClear"><i class="bi bi-trash"></i> Temizle</button>
     </div>
   </div>
-  <div class="countdown-bar mb-4" id="cntBar" style="width:0%"></div>
+  <div class="cnt-bar-wrap"><div class="cnt-bar" id="cntBar"></div></div>
 
   <!-- Fiyat kartları -->
   <div class="row g-3 mb-4" id="priceCards">
-    <div class="col-12 text-center text-secondary py-3" id="priceMsg">
-      <i class="bi bi-arrow-repeat"></i> Başlatmak için "Başlat" butonuna bas
+    <div class="col-12 empty-state" style="padding:2rem">
+      <i class="bi bi-play-circle" style="font-size:1.8rem;color:#484f58"></i>
+      <div style="color:#6e7681;margin-top:.5rem">Başlat butonuna bas, veriler yüklensin</div>
     </div>
   </div>
 
   <!-- Sinyal akışı -->
   <div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between">
-      <span><i class="bi bi-bell-fill me-2 text-warning"></i>Sinyal Akışı</span>
-      <small class="text-secondary" id="sigCount"></small>
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-bell-fill me-2" style="color:#d29922"></i>Sinyal Akışı</span>
+      <small id="sigCount" style="color:#6e7681"></small>
     </div>
-    <div id="signalList">
-      <div class="text-secondary text-center py-4 px-3" id="noSig">
-        Henüz sinyal yok — scanner'ı başlatın ve bekleyin.
+    <div id="sigList">
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <div>Henüz sinyal yok — scanner'ı başlatın</div>
       </div>
     </div>
   </div>
 
-</div><!-- /dashboard -->
+</div><!-- /dash -->
 
-<!-- ═══════════════════════ AYARLAR ═══════════════════════ -->
-<div class="tab-pane fade" id="tabSettings">
+<!-- ═══════════ AYARLAR ═══════════ -->
+<div class="tab-pane" id="tab-settings">
 <div class="row g-4 mt-0">
 
-  <!-- Sol -->
   <div class="col-lg-6">
 
     <!-- Telegram -->
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-telegram me-2 text-info"></i>Telegram Bildirimleri</div>
+      <div class="card-header"><i class="bi bi-telegram me-2" style="color:#29b6f6"></i>Telegram Bildirimleri</div>
       <div class="card-body">
-
-        <div class="alert alert-secondary py-2 small mb-3">
-          <strong>Bot nasıl oluşturulur?</strong><br>
-          1. Telegram'da <code>@BotFather</code>'ı aç<br>
-          2. <code>/newbot</code> yaz → bot adı ver → token al<br>
+        <div class="info-box mb-3">
+          <strong>Bot nasıl kurulur?</strong><br>
+          1. Telegram'da <code>@BotFather</code>'ı aç → <code>/newbot</code> yaz<br>
+          2. İsim ver → Token al → aşağıya yapıştır<br>
           3. Kendi botuna <code>/start</code> yaz<br>
-          4. Aşağıdaki butona bas → Chat ID otomatik gelir
+          4. <strong>"Chat ID Otomatik Al"</strong> butonuna bas
         </div>
-
         <div class="mb-3">
           <label class="form-label">Bot Token</label>
-          <input type="text" id="cfgToken" class="form-control font-monospace"
-                 placeholder="123456789:AAHxyz...">
+          <input type="text" id="cfgToken" class="form-control font-monospace" placeholder="123456789:AAHxyz...">
         </div>
         <div class="mb-3">
           <label class="form-label">Chat ID</label>
           <div class="input-group">
-            <input type="text" id="cfgChatId" class="form-control font-monospace" placeholder="123456789">
-            <button class="btn btn-outline-info" id="btnGetChatId" type="button">
-              <i class="bi bi-arrow-down-circle"></i> Otomatik Al
-            </button>
+            <input type="text" id="cfgChat" class="form-control font-monospace" placeholder="123456789">
+            <button class="btn btn-outline-info" id="btnGetChat"><i class="bi bi-arrow-down-circle"></i> Otomatik Al</button>
           </div>
-          <small class="hint">Token'ı gir, bota /start yaz, butona bas</small>
+          <div class="form-text">Bota /start yaz, sonra butona bas</div>
         </div>
-
-        <div class="d-flex gap-2 align-items-center">
-          <button class="btn btn-outline-info btn-sm" id="btnTestTg">
-            <i class="bi bi-send"></i> Test Gönder
-          </button>
-          <span id="tgResult" class="small"></span>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-info btn-sm" id="btnTestTg"><i class="bi bi-send"></i> Test Gönder</button>
+          <span id="tgRes" style="font-size:.82rem"></span>
         </div>
       </div>
     </div>
 
-    <!-- Tarama -->
+    <!-- Tarama Ayarları -->
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-sliders me-2 text-warning"></i>Tarama Ayarları</div>
+      <div class="card-header"><i class="bi bi-sliders me-2" style="color:#d29922"></i>İndikatör & Tarama</div>
       <div class="card-body">
         <div class="row g-3">
           <div class="col-6">
@@ -160,16 +211,28 @@
             </select>
           </div>
           <div class="col-6">
-            <label class="form-label">Aralık (saniye)</label>
-            <input type="number" id="cfgInterval" class="form-control" value="60" min="10" max="3600">
+            <label class="form-label">Tarama Aralığı (sn)</label>
+            <input type="number" id="cfgInt" class="form-control" value="60" min="10">
           </div>
           <div class="col-6">
             <label class="form-label">RSI Aşırı Satım</label>
-            <input type="number" id="cfgOversold" class="form-control" value="30" min="5" max="49">
+            <input type="number" id="cfgOs" class="form-control" value="30">
           </div>
           <div class="col-6">
             <label class="form-label">RSI Aşırı Alım</label>
-            <input type="number" id="cfgOverbought" class="form-control" value="70" min="51" max="95">
+            <input type="number" id="cfgOb" class="form-control" value="70">
+          </div>
+          <div class="col-6">
+            <label class="form-label">EMA Hızlı</label>
+            <input type="number" id="cfgEmaF" class="form-control" value="50">
+          </div>
+          <div class="col-6">
+            <label class="form-label">EMA Yavaş</label>
+            <input type="number" id="cfgEmaS" class="form-control" value="200">
+          </div>
+          <div class="col-12">
+            <label class="form-label">ATR SL Çarpanı <small style="color:#6e7681">(SL = fiyat ± ATR×çarpan)</small></label>
+            <input type="number" id="cfgAtr" class="form-control" value="1.5" step="0.1" min="0.5" max="5">
           </div>
         </div>
       </div>
@@ -177,342 +240,439 @@
 
   </div>
 
-  <!-- Sağ -->
   <div class="col-lg-6">
 
     <!-- Semboller -->
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-currency-bitcoin me-2 text-warning"></i>İzlenen Semboller</div>
+      <div class="card-header"><i class="bi bi-currency-bitcoin me-2" style="color:#f7931a"></i>İzlenen Semboller</div>
       <div class="card-body">
         <div id="symTags" class="d-flex flex-wrap gap-2 mb-3"></div>
         <div class="input-group">
-          <input type="text" id="symInput" class="form-control" placeholder="BTCUSDT veya BTC/USDT">
-          <button class="btn btn-outline-primary" id="btnAddSym"><i class="bi bi-plus"></i> Ekle</button>
+          <input type="text" id="symIn" class="form-control" placeholder="BTCUSDT veya BTC/USDT">
+          <button class="btn btn-outline-info" id="btnAddSym"><i class="bi bi-plus-lg"></i> Ekle</button>
         </div>
-        <small class="hint">Enter veya Ekle butonuna bas</small>
+        <div class="form-text">Enter veya Ekle butonuna bas</div>
       </div>
     </div>
 
     <!-- Fiyat Alarmları -->
     <div class="card mb-4">
-      <div class="card-header"><i class="bi bi-alarm me-2 text-danger"></i>Fiyat Alarmları</div>
+      <div class="card-header"><i class="bi bi-alarm me-2" style="color:#f85149"></i>Fiyat Alarmları</div>
       <div class="card-body">
-        <p class="small text-secondary">Boş bırakılan alanlar için alarm gelmez.</p>
+        <p style="font-size:.82rem;color:#6e7681">Boş bırakılan alanlar için alarm gelmez.</p>
         <div id="alertFields"></div>
       </div>
+    </div>
+
+    <!-- Konfluens Açıklaması -->
+    <div class="info-box">
+      <strong>⭐ Konfluens Skoru Nedir?</strong><br>
+      Bir sinyalin kaç farklı indikatör tarafından onaylandığını gösterir.<br>
+      <strong style="color:#3fb950">⭐⭐⭐⭐⭐</strong> = RSI + MACD + BB + Trend + Hacim hepsi uyuşuyor → çok güçlü<br>
+      <strong style="color:#f85149">⭐</strong> = Sadece tek indikatörden → zayıf, dikkatli ol
     </div>
 
   </div>
 </div>
 
-<button class="btn btn-primary px-4" id="btnSave">
-  <i class="bi bi-floppy"></i> Kaydet
-</button>
-<span class="ms-3 small text-secondary" id="saveMsg"></span>
+<div class="d-flex align-items-center gap-3 mt-3">
+  <button class="btn btn-primary px-4" id="btnSave"><i class="bi bi-floppy"></i> Kaydet</button>
+  <span id="saveMsg" style="font-size:.85rem"></span>
+</div>
 
 </div><!-- /settings -->
-</div><!-- /tab-content -->
-</div><!-- /container -->
+</div><!-- /wrap -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ═══════════════════════════════════════════════════
-//  AYARLAR (localStorage)
-// ═══════════════════════════════════════════════════
-const DEFAULT_CFG = {
+// ═══════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════
+const DEF={
   symbols:["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT"],
   timeframe:"1h", interval:60,
   rsiOs:30, rsiOb:70,
+  emaFast:50, emaSlow:200,
+  atrMult:1.5,
   token:"", chatId:"",
-  alerts:{} // {BTCUSDT:{above:100000,below:80000}}
+  alerts:{}
 };
 
+let CFG=loadCfg();
+let signals=JSON.parse(localStorage.getItem("kSigs")||"[]");
+
 function loadCfg(){
-  try{ return {...DEFAULT_CFG,...JSON.parse(localStorage.getItem("kriptoCfg")||"{}")}; }
-  catch{ return {...DEFAULT_CFG}; }
+  try{const s=JSON.parse(localStorage.getItem("kCfg")||"{}");return{...DEF,...s};}catch{return{...DEF};}
 }
-function saveCfg(c){ localStorage.setItem("kriptoCfg", JSON.stringify(c)); }
+function saveCfg(){localStorage.setItem("kCfg",JSON.stringify(CFG));}
+function saveSigs(){localStorage.setItem("kSigs",JSON.stringify(signals.slice(0,300)));}
 
-let CFG = loadCfg();
-let signals = JSON.parse(localStorage.getItem("kriptoSigs")||"[]");
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  btn.classList.add("active");
+  if(id==="settings") loadSettingsUI();
+}
 
-function saveSignals(){ localStorage.setItem("kriptoSigs", JSON.stringify(signals.slice(0,200))); }
+// ═══════════════════════════════════════════
+//  İNDİKATÖRLER
+// ═══════════════════════════════════════════
+function calcEMA(arr,span){
+  const k=2/(span+1);let e=arr[0];
+  return arr.map((v,i)=>{if(i===0){e=v;}else{e=v*k+e*(1-k);}return e;});
+}
 
-// ═══════════════════════════════════════════════════
-//  İNDİKATÖRLER (JS)
-// ═══════════════════════════════════════════════════
-function calcRSI(closes, period=14){
-  let gains=[], losses=[];
-  for(let i=1;i<closes.length;i++){
+function calcRSI(closes,period=14){
+  let ag=0,al=0;
+  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>0)ag+=d;else al-=d;}
+  ag/=period;al/=period;
+  for(let i=period+1;i<closes.length;i++){
     const d=closes[i]-closes[i-1];
-    gains.push(d>0?d:0); losses.push(d<0?-d:0);
+    ag=(ag*(period-1)+(d>0?d:0))/period;
+    al=(al*(period-1)+(d<0?-d:0))/period;
   }
-  // Wilder's smoothing
-  let ag=gains.slice(0,period).reduce((a,b)=>a+b,0)/period;
-  let al=losses.slice(0,period).reduce((a,b)=>a+b,0)/period;
-  for(let i=period;i<gains.length;i++){
-    ag=(ag*(period-1)+gains[i])/period;
-    al=(al*(period-1)+losses[i])/period;
-  }
-  if(al===0) return 100;
-  return 100-(100/(1+ag/al));
-}
-
-function calcEMA(arr, span){
-  const k=2/(span+1); let ema=arr[0];
-  return arr.map((v,i)=>{ if(i===0){ema=v;}else{ema=v*k+ema*(1-k);} return ema; });
+  return al===0?100:100-(100/(1+ag/al));
 }
 
 function calcMACD(closes){
-  const fast=calcEMA(closes,12), slow=calcEMA(closes,26);
-  const macd=fast.map((v,i)=>v-slow[i]);
-  const signal=calcEMA(macd,9);
-  return {macd, signal};
+  const fast=calcEMA(closes,12),slow=calcEMA(closes,26);
+  const ml=fast.map((v,i)=>v-slow[i]);
+  const sl=calcEMA(ml,9);
+  return{ml,sl,hist:ml.map((v,i)=>v-sl[i])};
 }
 
-function calcBB(closes, period=20, mult=2){
-  const mid=closes.map((_,i)=>{
-    if(i<period-1) return null;
-    const sl=closes.slice(i-period+1,i+1);
-    return sl.reduce((a,b)=>a+b,0)/period;
-  });
-  const upper=closes.map((_,i)=>{
-    if(i<period-1) return null;
-    const sl=closes.slice(i-period+1,i+1);
-    const m=mid[i];
-    const std=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/period);
-    return m+mult*std;
-  });
-  const lower=closes.map((_,i)=>{
-    if(i<period-1) return null;
-    const sl=closes.slice(i-period+1,i+1);
-    const m=mid[i];
-    const std=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/period);
-    return m-mult*std;
-  });
-  return {upper,mid,lower};
+function calcBB(closes,per=20,mult=2){
+  const n=closes.length-1;
+  const sl=closes.slice(n-per+1,n+1);
+  const mid=sl.reduce((a,b)=>a+b,0)/per;
+  const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/per);
+  return{upper:mid+mult*std,mid,lower:mid-mult*std};
 }
 
-// ═══════════════════════════════════════════════════
-//  BİNANCE API
-// ═══════════════════════════════════════════════════
-function normSym(s){ return s.replace("/","").toUpperCase(); }
-
-async function fetchKlines(symbol, interval, limit=100){
-  const url=`https://api.binance.com/api/v3/klines?symbol=${normSym(symbol)}&interval=${interval}&limit=${limit}`;
-  const r=await fetch(url); if(!r.ok) throw new Error(r.status);
-  return (await r.json()).map(k=>({
-    t:new Date(k[0]), o:+k[1], h:+k[2], l:+k[3], c:+k[4], v:+k[5]
-  }));
+function calcATR(klines,period=14){
+  const trs=[];
+  for(let i=1;i<klines.length;i++){
+    const h=klines[i].h,l=klines[i].l,pc=klines[i-1].c;
+    trs.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)));
+  }
+  return trs.slice(-period).reduce((a,b)=>a+b,0)/period;
 }
 
-async function fetchTicker(symbol){
-  const url=`https://api.binance.com/api/v3/ticker/24hr?symbol=${normSym(symbol)}`;
-  const r=await fetch(url); if(!r.ok) throw new Error(r.status);
-  return await r.json();
+function avgVol(klines,period=20){
+  const vols=klines.slice(-period).map(k=>k.v);
+  return vols.reduce((a,b)=>a+b,0)/period;
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  BİNANCE
+// ═══════════════════════════════════════════
+function ns(s){return s.replace("/","").toUpperCase();}
+
+async function fetchKlines(sym,tf,limit=210){
+  const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${ns(sym)}&interval=${tf}&limit=${limit}`);
+  if(!r.ok)throw new Error(r.status);
+  return(await r.json()).map(k=>({t:k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],v:+k[5]}));
+}
+
+async function fetchTicker(sym){
+  const r=await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ns(sym)}`);
+  if(!r.ok)throw new Error(r.status);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════
 //  TELEGRAM
-// ═══════════════════════════════════════════════════
-async function sendTelegram(text){
-  const {token,chatId}=CFG;
-  if(!token||!chatId) return;
-  try{
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({chat_id:chatId,text,parse_mode:"Markdown"})
-    });
-  }catch(e){console.warn("Telegram:",e);}
+// ═══════════════════════════════════════════
+async function tgSend(text){
+  if(!CFG.token||!CFG.chatId)return;
+  try{await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:CFG.chatId,text,parse_mode:"Markdown"})
+  });}catch(e){console.warn("TG:",e);}
 }
 
-async function getChatId(token){
+async function tgGetChatId(token){
   const r=await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
   const j=await r.json();
-  const msg=j.result?.find(u=>u.message?.chat?.id);
-  return msg?.message?.chat?.id?.toString()||null;
+  return j.result?.find(u=>u.message?.chat?.id)?.message?.chat?.id?.toString()||null;
 }
 
-// ═══════════════════════════════════════════════════
-//  TARAMA
-// ═══════════════════════════════════════════════════
-const EMOJI={BUY:"🟢",SELL:"🔴",ALERT:"⚠️"};
+// ═══════════════════════════════════════════
+//  TARAMA & ANALİZ
+// ═══════════════════════════════════════════
 let prices={};
+const EMOJI={BUY:"🟢",SELL:"🔴",ALERT:"⚠️"};
+const STARS=["","⭐","⭐⭐","⭐⭐⭐","⭐⭐⭐⭐","⭐⭐⭐⭐⭐"];
 
-function addSignal(sig){
-  sig.time=new Date().toLocaleTimeString("tr-TR");
-  signals.unshift(sig);
-  saveSignals();
-  renderSignals();
-  const em=EMOJI[sig.type]||"ℹ️";
-  sendTelegram(`${em} *${sig.type}* — ${sig.symbol}\n💰 Fiyat: \`${sig.price}\`\n📊 RSI: \`${sig.rsi??"-"}\`\n📝 ${sig.reason}`);
+function fmtPrice(p){
+  if(p>=100)return p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(p>=1)return p.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
+  return p.toLocaleString("en-US",{minimumFractionDigits:4,maximumFractionDigits:6});
 }
 
-async function scanSymbol(sym){
-  const klines=await fetchKlines(sym, CFG.timeframe, 100);
-  const ticker=await fetchTicker(sym);
+async function analyzeSymbol(sym){
+  const [klines,ticker]=await Promise.all([fetchKlines(sym,CFG.timeframe,210),fetchTicker(sym)]);
   const price=+ticker.lastPrice;
-  const change=+ticker.priceChangePercent;
-
-  prices[normSym(sym)]={price,change};
-
+  const chgPct=+ticker.priceChangePercent;
   const closes=klines.map(k=>k.c);
-  const rsi=calcRSI(closes);
-  const {macd,signal}=calcMACD(closes);
-  const {upper,lower}=calcBB(closes);
-
   const n=closes.length-1;
-  const priceStr=price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:6});
 
-  // RSI
-  if(rsi<CFG.rsiOs)
-    addSignal({symbol:normSym(sym),type:"BUY",reason:`RSI aşırı satım (${rsi.toFixed(1)} < ${CFG.rsiOs})`,price:priceStr,rsi:rsi.toFixed(1)});
-  else if(rsi>CFG.rsiOb)
-    addSignal({symbol:normSym(sym),type:"SELL",reason:`RSI aşırı alım (${rsi.toFixed(1)} > ${CFG.rsiOb})`,price:priceStr,rsi:rsi.toFixed(1)});
+  // İndikatörler
+  const rsi=calcRSI(closes);
+  const {ml,sl,hist}=calcMACD(closes);
+  const bb=calcBB(closes);
+  const atr=calcATR(klines);
+  const emaF=calcEMA(closes,CFG.emaFast);
+  const emaS=calcEMA(closes,CFG.emaSlow);
+  const volAvg=avgVol(klines);
+  const lastVol=klines[n].v;
+  const volRatio=lastVol/volAvg;
 
-  // MACD kesişim
-  if(macd[n-1]<signal[n-1]&&macd[n]>signal[n])
-    addSignal({symbol:normSym(sym),type:"BUY",reason:"MACD yukarı kesişim",price:priceStr,rsi:rsi.toFixed(1)});
-  else if(macd[n-1]>signal[n-1]&&macd[n]<signal[n])
-    addSignal({symbol:normSym(sym),type:"SELL",reason:"MACD aşağı kesişim",price:priceStr,rsi:rsi.toFixed(1)});
+  // Trend
+  const emaFLast=emaF[n],emaSLast=emaS[n];
+  const trend=price>emaFLast&&emaFLast>emaSLast?"BULL":price<emaFLast&&emaFLast<emaSLast?"BEAR":"NEUTRAL";
+  const highVol=volRatio>1.5;
+
+  // Genel kanı için sembol kartı verisi
+  prices[ns(sym)]={price,chgPct,rsi,trend,volRatio,emaF:emaFLast,emaS:emaSLast,
+    macdHist:hist[n],bb,atr};
+
+  // ─ Sinyal üret ─
+  const slMult=CFG.atrMult;
+
+  function makeSignal(type,reasons,extraScore=0){
+    const score=Math.min(5,reasons.length+extraScore);
+    let sl,tp1,tp2,tp3;
+    if(type==="BUY"){
+      sl=price-slMult*atr; tp1=price+slMult*atr; tp2=price+2*slMult*atr; tp3=price+3*slMult*atr;
+    }else if(type==="SELL"){
+      sl=price+slMult*atr; tp1=price-slMult*atr; tp2=price-2*slMult*atr; tp3=price-3*slMult*atr;
+    }else{sl=tp1=tp2=tp3=null;}
+    return{symbol:ns(sym),type,reasons,score,price:fmtPrice(price),rawPrice:price,
+      rsi:rsi.toFixed(1),trend,volRatio:volRatio.toFixed(1),
+      sl:sl?fmtPrice(sl):null,tp1:tp1?fmtPrice(tp1):null,
+      tp2:tp2?fmtPrice(tp2):null,tp3:tp3?fmtPrice(tp3):null,
+      time:new Date().toLocaleTimeString("tr-TR")};
+  }
+
+  // BUY sinyalleri topla
+  const buyReasons=[];
+  const sellReasons=[];
+
+  if(rsi<CFG.rsiOs)buyReasons.push(`RSI aşırı satım (${rsi.toFixed(1)})`);
+  if(rsi>CFG.rsiOb)sellReasons.push(`RSI aşırı alım (${rsi.toFixed(1)})`);
+
+  // MACD kesişim (son 2 mum)
+  const macdCrossUp=ml[n-1]<sl[n-1]&&ml[n]>sl[n];
+  const macdCrossDn=ml[n-1]>sl[n-1]&&ml[n]<sl[n];
+  if(macdCrossUp)buyReasons.push("MACD yukarı kesişim");
+  if(macdCrossDn)sellReasons.push("MACD aşağı kesişim");
+
+  // MACD histogram momentum
+  if(hist[n]>0&&hist[n]>hist[n-1]&&hist[n-1]>hist[n-2])buyReasons.push("MACD momentumu artıyor");
+  if(hist[n]<0&&hist[n]<hist[n-1]&&hist[n-1]<hist[n-2])sellReasons.push("MACD momentumu düşüyor");
 
   // Bollinger
-  if(upper[n]!=null&&price>upper[n])
-    addSignal({symbol:normSym(sym),type:"SELL",reason:`Fiyat üst BB üstünde (${upper[n].toFixed(2)})`,price:priceStr,rsi:rsi.toFixed(1)});
-  else if(lower[n]!=null&&price<lower[n])
-    addSignal({symbol:normSym(sym),type:"BUY",reason:`Fiyat alt BB altında (${lower[n].toFixed(2)})`,price:priceStr,rsi:rsi.toFixed(1)});
+  if(price<bb.lower)buyReasons.push(`Alt BB kırıldı (${fmtPrice(bb.lower)})`);
+  if(price>bb.upper)sellReasons.push(`Üst BB kırıldı (${fmtPrice(bb.upper)})`);
+
+  // EMA trend
+  if(trend==="BULL")buyReasons.push("EMA trendi yukarı (Boğa)");
+  if(trend==="BEAR")sellReasons.push("EMA trendi aşağı (Ayı)");
+  if(trend==="NEUTRAL"&&buyReasons.length)buyReasons.push("Trend nötr");
+  if(trend==="NEUTRAL"&&sellReasons.length)sellReasons.push("Trend nötr");
+
+  // Hacim onayı
+  if(highVol&&buyReasons.length) buyReasons.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
+  if(highVol&&sellReasons.length)sellReasons.push(`Yüksek hacim (×${volRatio.toFixed(1)})`);
+
+  const generated=[];
+
+  // Sadece 2+ konfluens olan sinyaller üret (tek indikatör gürültü)
+  if(buyReasons.length>=2) generated.push(makeSignal("BUY",buyReasons));
+  else if(buyReasons.length===1) generated.push(makeSignal("BUY",buyReasons)); // yine de göster, düşük skor
+
+  if(sellReasons.length>=2) generated.push(makeSignal("SELL",sellReasons));
+  else if(sellReasons.length===1) generated.push(makeSignal("SELL",sellReasons));
 
   // Fiyat alarmları
-  const al=CFG.alerts[normSym(sym)]||{};
+  const al=CFG.alerts[ns(sym)]||{};
   if(al.above&&price>al.above)
-    addSignal({symbol:normSym(sym),type:"ALERT",reason:`Fiyat ${al.above} üstüne çıktı`,price:priceStr,rsi:rsi.toFixed(1)});
+    generated.push(makeSignal("ALERT",[`Fiyat hedef ${fmtPrice(al.above)} üstüne çıktı`]));
   if(al.below&&price<al.below)
-    addSignal({symbol:normSym(sym),type:"ALERT",reason:`Fiyat ${al.below} altına düştü`,price:priceStr,rsi:rsi.toFixed(1)});
+    generated.push(makeSignal("ALERT",[`Fiyat hedef ${fmtPrice(al.below)} altına düştü`]));
+
+  // Kaydet & bildir
+  for(const sig of generated){
+    signals.unshift(sig);
+    const em=EMOJI[sig.type]||"ℹ️";
+    const rsLine=sig.reasons.map(r=>`• ${r}`).join("\n");
+    tgSend(
+      `${em} *${sig.type}* — ${sig.symbol} ${STARS[sig.score]||""}\n`+
+      `💰 Fiyat: \`${sig.price}\`\n`+
+      `📊 RSI: \`${sig.rsi}\`  |  Trend: ${sig.trend}\n`+
+      (sig.sl?`🛑 SL: \`${sig.sl}\`\n`+
+               `🎯 TP1: \`${sig.tp1}\` | TP2: \`${sig.tp2}\` | TP3: \`${sig.tp3}\`\n`:"")+
+      `\n${rsLine}`
+    );
+  }
+
+  saveSigs();
+  return generated;
 }
 
 async function scanAll(){
-  const ps=CFG.symbols.map(s=>scanSymbol(s).catch(e=>console.error(s,e)));
-  await Promise.all(ps);
+  const tasks=CFG.symbols.map(s=>analyzeSymbol(s).catch(e=>{console.error(s,e);return[];}));
+  const results=await Promise.all(tasks);
   renderPrices();
+  renderSignals();
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  ZAMANLAYICI
-// ═══════════════════════════════════════════════════
-let timer=null, cntTimer=null, cntLeft=0;
+// ═══════════════════════════════════════════
+let timer=null,cntTimer=null,cntLeft=0;
 
 function startScanner(){
-  if(timer) return;
+  if(timer)return;
   scanAll();
-  timer=setInterval(()=>{ scanAll(); cntLeft=CFG.interval; }, CFG.interval*1000);
   cntLeft=CFG.interval;
+  timer=setInterval(()=>{scanAll();cntLeft=CFG.interval;},CFG.interval*1000);
   cntTimer=setInterval(()=>{
     cntLeft=Math.max(0,cntLeft-1);
-    const pct=(1-cntLeft/CFG.interval)*100;
-    document.getElementById("cntBar").style.width=pct+"%";
-    document.getElementById("scanNext").textContent=cntLeft>0?`Sonraki tarama: ${cntLeft}s`:"Tarıyor…";
+    document.getElementById("cntBar").style.width=((1-cntLeft/CFG.interval)*100)+"%";
+    document.getElementById("sNext").textContent=cntLeft>0?`Sonraki: ${cntLeft}s`:"Tarıyor…";
   },1000);
   setRunning(true);
 }
-
 function stopScanner(){
-  clearInterval(timer); clearInterval(cntTimer); timer=null; cntTimer=null;
+  clearInterval(timer);clearInterval(cntTimer);timer=null;cntTimer=null;
   document.getElementById("cntBar").style.width="0%";
-  document.getElementById("scanNext").textContent="";
+  document.getElementById("sNext").textContent="";
   setRunning(false);
 }
-
 function setRunning(on){
-  document.getElementById("scanDot").className="dot "+(on?"dot-on":"dot-off");
-  document.getElementById("scanLabel").textContent=on?"Çalışıyor":"Durduruldu";
-  document.getElementById("scanLabel").className=on?"text-success":"text-secondary";
+  document.getElementById("sDot").className="dot "+(on?"dot-on":"dot-off");
+  const lbl=document.getElementById("sLabel");
+  lbl.textContent=on?"Çalışıyor":"Durduruldu";
+  lbl.style.color=on?"#3fb950":"#6e7681";
   document.getElementById("btnStart").disabled=on;
   document.getElementById("btnStop").disabled=!on;
 }
 
-// ═══════════════════════════════════════════════════
-//  RENDER
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  RENDER — FİYATLAR
+// ═══════════════════════════════════════════
+function trendBadge(t){
+  if(t==="BULL")return`<span class="mini-badge mb-bull">▲ YUKARI</span>`;
+  if(t==="BEAR")return`<span class="mini-badge mb-bear">▼ AŞAĞI</span>`;
+  return`<span class="mini-badge mb-neutral">→ YATAY</span>`;
+}
+function rsiColor(r){return r<35?"#3fb950":r>65?"#f85149":"#c9d1d9";}
+function sentiment(d){
+  // trend + rsi + macd kombinasyonu
+  let s=0;
+  if(d.trend==="BULL")s++;if(d.trend==="BEAR")s--;
+  if(d.rsi<45)s++;if(d.rsi>55)s--;
+  if(d.macdHist>0)s++;if(d.macdHist<0)s--;
+  if(s>=2)return`<span class="mini-badge mb-bull">AL</span>`;
+  if(s<=-2)return`<span class="mini-badge mb-bear">SAT</span>`;
+  return`<span class="mini-badge mb-neutral">BEKLE</span>`;
+}
+
 function renderPrices(){
   const wrap=document.getElementById("priceCards");
-  const pm=document.getElementById("priceMsg");
-  if(pm) pm.remove();
+  if(!Object.keys(prices).length)return;
   wrap.innerHTML="";
-  for(const [sym,d] of Object.entries(prices)){
-    const chg=(d.change||0).toFixed(2);
-    const pos=chg>=0;
+  for(const[sym,d]of Object.entries(prices)){
+    const pos=d.chgPct>=0;
     wrap.innerHTML+=`
     <div class="col-6 col-md-3">
-      <div class="card price-card p-3">
-        <div class="text-secondary small mb-1">${sym}</div>
-        <div class="fs-5 fw-bold">$${Number(d.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:6})}</div>
-        <div class="${pos?"change-pos":"change-neg"} small">${pos?"▲":"▼"} ${chg}%</div>
+      <div class="sym-card">
+        <div class="sym-name">${sym}</div>
+        <div class="sym-price">$${fmtPrice(d.price)}</div>
+        <div class="sym-change ${pos?"pos":"neg"}">${pos?"▲":"▼"} ${Math.abs(d.chgPct).toFixed(2)}%</div>
+        <div class="sym-meta">
+          ${trendBadge(d.trend)}
+          <span class="mini-badge mb-rsi" style="color:${rsiColor(d.rsi)}">RSI ${d.rsi.toFixed(0)}</span>
+          <span class="mini-badge mb-vol">Hcm ×${d.volRatio.toFixed(1)}</span>
+          ${sentiment(d)}
+        </div>
       </div>
     </div>`;
   }
 }
 
+// ═══════════════════════════════════════════
+//  RENDER — SİNYALLER
+// ═══════════════════════════════════════════
 function renderSignals(){
-  const list=document.getElementById("signalList");
-  const ns=document.getElementById("noSig");
-  document.getElementById("sigCount").textContent=signals.length?" "+signals.length+" sinyal":"";
+  const list=document.getElementById("sigList");
+  const cnt=document.getElementById("sigCount");
+  cnt.textContent=signals.length?signals.length+" sinyal":"";
   if(!signals.length){
-    list.innerHTML=`<div class="text-secondary text-center py-4 px-3" id="noSig">Henüz sinyal yok — scanner'ı başlatın ve bekleyin.</div>`;
+    list.innerHTML=`<div class="empty-state"><i class="bi bi-inbox"></i><div>Henüz sinyal yok — scanner'ı başlatın</div></div>`;
     return;
   }
-  if(ns) ns.remove();
-  list.innerHTML=signals.map(s=>`
-  <div class="signal-row ${s.type} px-4 py-3 border-bottom border-secondary border-opacity-25 d-flex gap-3">
-    <span class="fs-5 mt-1">${EMOJI[s.type]||"ℹ️"}</span>
-    <div class="flex-grow-1">
-      <div class="d-flex align-items-center gap-2 mb-1">
-        <span class="badge badge-${s.type.toLowerCase()}">${s.type}</span>
-        <strong>${s.symbol}</strong>
-        <span class="text-secondary small ms-auto">${s.time||""}</span>
+  list.innerHTML=signals.map(s=>{
+    const reasons=Array.isArray(s.reasons)?s.reasons.join(" • "):s.reasons||s.reason||"";
+    const sltp=s.sl?`
+      <div class="sl-tp">
+        <span class="sl">🛑 SL: $${s.sl}</span>
+        <span class="tp1">🎯 TP1: $${s.tp1}</span>
+        <span class="tp2">TP2: $${s.tp2}</span>
+        <span class="tp3">TP3: $${s.tp3}</span>
+      </div>`:"";
+    return`
+    <div class="signal-row ${s.type}">
+      <div style="display:flex;align-items:flex-start;gap:.75rem">
+        <span style="font-size:1.2rem;margin-top:.1rem">${EMOJI[s.type]||"ℹ️"}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.25rem">
+            <span class="sig-type ${s.type}">${s.type}</span>
+            <span class="sig-sym">${s.symbol}</span>
+            <span class="stars">${STARS[s.score]||""}</span>
+            <span class="sig-time" style="margin-left:auto">${s.time||""}</span>
+          </div>
+          <div class="sig-reason">${reasons}</div>
+          <div class="sig-meta">
+            <span>💰 <span>$${s.price}</span></span>
+            <span>RSI <span>${s.rsi}</span></span>
+            <span>Trend <span>${s.trend}</span></span>
+            <span>Hcm ×<span>${s.volRatio||"-"}</span></span>
+          </div>
+          ${sltp}
+        </div>
       </div>
-      <div class="small text-secondary">${s.reason}</div>
-      <div class="small mt-1">
-        💰 <span class="fw-bold">$${s.price}</span>
-        ${s.rsi?`&nbsp;|&nbsp; RSI: <span class="fw-bold">${s.rsi}</span>`:""}
-      </div>
-    </div>
-  </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  AYARLAR UI
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function renderSymTags(){
-  const wrap=document.getElementById("symTags");
-  wrap.innerHTML=CFG.symbols.map(s=>`
-    <span class="sym-tag">
-      ${normSym(s)}
-      <span class="remove" data-sym="${normSym(s)}">✕</span>
-    </span>`).join("");
-  wrap.querySelectorAll(".remove").forEach(el=>el.addEventListener("click",()=>{
-    CFG.symbols=CFG.symbols.filter(x=>normSym(x)!==el.dataset.sym);
-    renderSymTags(); renderAlertFields();
+  const w=document.getElementById("symTags");
+  w.innerHTML=CFG.symbols.map(s=>`
+    <span class="sym-tag">${ns(s)}<span class="rm" data-s="${ns(s)}">✕</span></span>`).join("");
+  w.querySelectorAll(".rm").forEach(el=>el.addEventListener("click",()=>{
+    CFG.symbols=CFG.symbols.filter(x=>ns(x)!==el.dataset.s);
+    renderSymTags();renderAlertFields();
   }));
 }
 
 function renderAlertFields(){
-  const wrap=document.getElementById("alertFields");
-  wrap.innerHTML=CFG.symbols.map(s=>{
-    const sym=normSym(s);
-    const al=CFG.alerts[sym]||{};
-    return `
-    <div class="mb-3">
-      <label class="form-label fw-bold small">${sym}</label>
+  document.getElementById("alertFields").innerHTML=CFG.symbols.map(s=>{
+    const sym=ns(s);const al=CFG.alerts[sym]||{};
+    return`<div class="mb-3">
+      <label class="form-label" style="font-weight:600">${sym}</label>
       <div class="row g-2">
-        <div class="col-6">
-          <input type="number" class="form-control form-control-sm alert-above" data-sym="${sym}"
-                 placeholder="Üst limit ($)" step="any" value="${al.above||""}">
-        </div>
-        <div class="col-6">
-          <input type="number" class="form-control form-control-sm alert-below" data-sym="${sym}"
-                 placeholder="Alt limit ($)" step="any" value="${al.below||""}">
-        </div>
+        <div class="col-6"><input type="number" class="form-control form-control-sm aa" data-sym="${sym}" placeholder="Üst limit ($)" step="any" value="${al.above||""}"></div>
+        <div class="col-6"><input type="number" class="form-control form-control-sm ab" data-sym="${sym}" placeholder="Alt limit ($)" step="any" value="${al.below||""}"></div>
       </div>
     </div>`;
   }).join("");
@@ -520,91 +680,87 @@ function renderAlertFields(){
 
 function loadSettingsUI(){
   document.getElementById("cfgToken").value=CFG.token||"";
-  document.getElementById("cfgChatId").value=CFG.chatId||"";
+  document.getElementById("cfgChat").value=CFG.chatId||"";
   document.getElementById("cfgTf").value=CFG.timeframe||"1h";
-  document.getElementById("cfgInterval").value=CFG.interval||60;
-  document.getElementById("cfgOversold").value=CFG.rsiOs||30;
-  document.getElementById("cfgOverbought").value=CFG.rsiOb||70;
-  renderSymTags();
-  renderAlertFields();
+  document.getElementById("cfgInt").value=CFG.interval||60;
+  document.getElementById("cfgOs").value=CFG.rsiOs||30;
+  document.getElementById("cfgOb").value=CFG.rsiOb||70;
+  document.getElementById("cfgEmaF").value=CFG.emaFast||50;
+  document.getElementById("cfgEmaS").value=CFG.emaSlow||200;
+  document.getElementById("cfgAtr").value=CFG.atrMult||1.5;
+  renderSymTags();renderAlertFields();
 }
 
-function collectAndSave(){
+function collectSettings(){
   CFG.token=document.getElementById("cfgToken").value.trim();
-  CFG.chatId=document.getElementById("cfgChatId").value.trim();
+  CFG.chatId=document.getElementById("cfgChat").value.trim();
   CFG.timeframe=document.getElementById("cfgTf").value;
-  CFG.interval=+document.getElementById("cfgInterval").value||60;
-  CFG.rsiOs=+document.getElementById("cfgOversold").value||30;
-  CFG.rsiOb=+document.getElementById("cfgOverbought").value||70;
-  // alarmlar
+  CFG.interval=+document.getElementById("cfgInt").value||60;
+  CFG.rsiOs=+document.getElementById("cfgOs").value||30;
+  CFG.rsiOb=+document.getElementById("cfgOb").value||70;
+  CFG.emaFast=+document.getElementById("cfgEmaF").value||50;
+  CFG.emaSlow=+document.getElementById("cfgEmaS").value||200;
+  CFG.atrMult=+document.getElementById("cfgAtr").value||1.5;
   CFG.alerts={};
-  document.querySelectorAll(".alert-above").forEach(el=>{
-    if(el.value) { CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{}; CFG.alerts[el.dataset.sym].above=+el.value; }
-  });
-  document.querySelectorAll(".alert-below").forEach(el=>{
-    if(el.value) { CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{}; CFG.alerts[el.dataset.sym].below=+el.value; }
-  });
-  saveCfg(CFG);
-  const msg=document.getElementById("saveMsg");
-  msg.textContent="✅ Kaydedildi"; msg.className="small text-success";
-  setTimeout(()=>{msg.textContent="";},2500);
+  document.querySelectorAll(".aa").forEach(el=>{if(el.value){CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{};CFG.alerts[el.dataset.sym].above=+el.value;}});
+  document.querySelectorAll(".ab").forEach(el=>{if(el.value){CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{};CFG.alerts[el.dataset.sym].below=+el.value;}});
 }
 
-function addSymbol(raw){
-  const sym=normSym(raw.trim());
-  if(!sym||CFG.symbols.map(normSym).includes(sym)) return;
-  CFG.symbols.push(sym);
-  renderSymTags(); renderAlertFields();
+function addSym(raw){
+  const s=ns(raw.trim());
+  if(!s||CFG.symbols.map(ns).includes(s))return;
+  CFG.symbols.push(s);renderSymTags();renderAlertFields();
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  OLAYLAR
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 document.getElementById("btnStart").addEventListener("click",startScanner);
 document.getElementById("btnStop").addEventListener("click",stopScanner);
-document.getElementById("btnScanNow").addEventListener("click",()=>scanAll());
+document.getElementById("btnNow").addEventListener("click",scanAll);
 document.getElementById("btnClear").addEventListener("click",()=>{
-  if(!confirm("Tüm sinyaller silinsin mi?")) return;
-  signals=[]; saveSignals(); renderSignals();
+  if(!confirm("Tüm sinyaller silinsin mi?"))return;
+  signals=[];saveSigs();renderSignals();
 });
-document.getElementById("btnSave").addEventListener("click",collectAndSave);
-
+document.getElementById("btnSave").addEventListener("click",()=>{
+  collectSettings();saveCfg();
+  const m=document.getElementById("saveMsg");
+  m.textContent="✅ Kaydedildi";m.style.color="#3fb950";
+  setTimeout(()=>m.textContent="",2500);
+});
 document.getElementById("btnAddSym").addEventListener("click",()=>{
-  addSymbol(document.getElementById("symInput").value);
-  document.getElementById("symInput").value="";
+  addSym(document.getElementById("symIn").value);
+  document.getElementById("symIn").value="";
 });
-document.getElementById("symInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){ addSymbol(e.target.value); e.target.value=""; }
+document.getElementById("symIn").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){addSym(e.target.value);e.target.value="";}
 });
-
 document.getElementById("btnTestTg").addEventListener("click",async()=>{
-  collectAndSave();
-  const res=document.getElementById("tgResult");
-  if(!CFG.token||!CFG.chatId){ res.textContent="⚠️ Token ve Chat ID gerekli"; res.className="small text-warning"; return; }
-  res.textContent="Gönderiliyor…"; res.className="small text-secondary";
+  collectSettings();saveCfg();
+  const res=document.getElementById("tgRes");
+  if(!CFG.token||!CFG.chatId){res.textContent="⚠️ Token ve Chat ID gir";res.style.color="#d29922";return;}
+  res.textContent="Gönderiliyor…";res.style.color="#8b949e";
   try{
     const r=await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({chat_id:CFG.chatId,text:"✅ Kripto Sinyal Botu aktif!"})
+      body:JSON.stringify({chat_id:CFG.chatId,text:"✅ Kripto Sinyal Pro bağlantısı başarılı!"})
     });
     const j=await r.json();
-    if(j.ok){ res.textContent="✅ Telegram'a ulaştı!"; res.className="small text-success"; }
-    else{ res.textContent="❌ "+j.description; res.className="small text-danger"; }
-  }catch(e){ res.textContent="❌ Hata: "+e.message; res.className="small text-danger"; }
+    if(j.ok){res.textContent="✅ Telegram'a ulaştı";res.style.color="#3fb950";}
+    else{res.textContent="❌ "+j.description;res.style.color="#f85149";}
+  }catch(e){res.textContent="❌ Hata";res.style.color="#f85149";}
+});
+document.getElementById("btnGetChat").addEventListener("click",async()=>{
+  const tok=document.getElementById("cfgToken").value.trim();
+  if(!tok){alert("Önce token gir, sonra bota /start yaz.");return;}
+  const id=await tgGetChatId(tok);
+  if(id)document.getElementById("cfgChat").value=id;
+  else alert("Chat ID bulunamadı.\nBotuna /start yazıp tekrar dene.");
 });
 
-document.getElementById("btnGetChatId").addEventListener("click",async()=>{
-  const token=document.getElementById("cfgToken").value.trim();
-  if(!token){ alert("Önce token gir."); return; }
-  const id=await getChatId(token);
-  if(id){ document.getElementById("cfgChatId").value=id; }
-  else{ alert("Chat ID bulunamadı.\nBotuna /start yazdıktan sonra tekrar dene."); }
-});
-
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  BAŞLAT
-// ═══════════════════════════════════════════════════
-loadSettingsUI();
+// ═══════════════════════════════════════════
 renderSignals();
 </script>
 </body>
