@@ -131,6 +131,10 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 .btn-outline-info{border-color:#1f6feb;color:#58a6ff}
 .btn-outline-info:hover{background:#1c2f52;color:#79c0ff}
 .btn-sm{font-size:.77rem;padding:.25rem .6rem}
+/* signal filters */
+.flt-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:.18rem .55rem;font-size:.72rem;cursor:pointer;transition:.15s}
+.flt-btn:hover{background:#30363d;color:#c9d1d9}
+.flt-btn.active{background:#1c2f52;border-color:#1f6feb;color:#79c0ff;font-weight:600}
 .sym-tag{display:inline-flex;align-items:center;gap:.3rem;background:#21262d;border:1px solid #30363d;border-radius:5px;padding:.16rem .5rem;font-size:.76rem;color:#c9d1d9}
 .sym-tag .rm{cursor:pointer;color:#6e7681;font-size:.74rem}.sym-tag .rm:hover{color:#f85149}
 .preset-btn{font-size:.72rem;padding:.18rem .5rem;border-radius:5px;background:#21262d;border:1px solid #30363d;color:#8b949e;cursor:pointer;transition:.15s}
@@ -192,6 +196,18 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
     <div class="card-header">
       <span><i class="bi bi-bell-fill me-2" style="color:#d29922"></i>Sinyal Akışı</span>
       <small id="sigCount" style="color:#6e7681;font-weight:400"></small>
+    </div>
+    <div id="sigFilters" style="padding:.5rem 1rem;background:#1c2128;border-bottom:1px solid #30363d;display:flex;flex-wrap:wrap;gap:.35rem;align-items:center">
+      <span style="font-size:.71rem;color:#6e7681;margin-right:.1rem">Yön:</span>
+      <button class="flt-btn active" id="flt-all" onclick="setSigFilter('dir','ALL')">Tümü</button>
+      <button class="flt-btn" id="flt-long" onclick="setSigFilter('dir','LONG')">🟢 LONG</button>
+      <button class="flt-btn" id="flt-short" onclick="setSigFilter('dir','SHORT')">🔴 SHORT</button>
+      <span style="width:1px;height:16px;background:#30363d;margin:0 .3rem;align-self:center"></span>
+      <span style="font-size:.71rem;color:#6e7681;margin-right:.1rem">Puan:</span>
+      <button class="flt-btn active" id="flt-s0" onclick="setSigFilter('score',0)">Tümü</button>
+      <button class="flt-btn" id="flt-s50" onclick="setSigFilter('score',50)">📊 50+</button>
+      <button class="flt-btn" id="flt-s65" onclick="setSigFilter('score',65)">💪 65+</button>
+      <button class="flt-btn" id="flt-s80" onclick="setSigFilter('score',80)">🔥 80+</button>
     </div>
     <div id="sigList" style="display:flex;flex-direction:column;max-height:640px;overflow-y:auto;overflow-x:hidden">
       <div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok</div></div>
@@ -405,6 +421,24 @@ let closedTrades=JSON.parse(localStorage.getItem("bfClosed")||"[]");
 let marketData={};
 let prevOI={};
 let usdTry=0; // anlık USD/TRY kuru
+let sigFilterDir='ALL', sigFilterScore=0;
+
+function setSigFilter(type,val){
+  if(type==='dir'){
+    sigFilterDir=val;
+    ['all','long','short'].forEach(k=>{
+      const el=document.getElementById('flt-'+k);
+      if(el)el.classList.toggle('active',(k==='all'&&val==='ALL')||(k==='long'&&val==='LONG')||(k==='short'&&val==='SHORT'));
+    });
+  } else {
+    sigFilterScore=val;
+    [0,50,65,80].forEach(k=>{
+      const el=document.getElementById('flt-s'+k);
+      if(el)el.classList.toggle('active',k===val);
+    });
+  }
+  renderSignals();
+}
 
 async function fetchUsdTry(){
   try{
@@ -977,12 +1011,19 @@ function renderPrices(){
 function renderSignals(){
   const list=document.getElementById("sigList");
   list.style.cssText="display:flex!important;flex-direction:column!important;max-height:640px;overflow-y:auto;overflow-x:hidden";
-  document.getElementById("sigCount").textContent=signals.length?signals.length+" sinyal":"";
-  if(!signals.length){
-    list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok — scanner'ı başlatın</div></div>`;
+  // Filtrele
+  let filtered=[...signals];
+  if(sigFilterDir!=='ALL') filtered=filtered.filter(s=>s.type==="ALERT"||s.type===sigFilterDir);
+  if(sigFilterScore>0) filtered=filtered.filter(s=>s.type==="ALERT"||s.score>=sigFilterScore);
+  // Puana göre sırala (yüksekten düşüğe)
+  filtered.sort((a,b)=>b.score-a.score);
+  const total=signals.length, shown=filtered.length;
+  document.getElementById("sigCount").textContent=shown?`${shown} sinyal${shown<total?" ("+total+" toplam)":""}` :"";
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">${signals.length?"Bu filtreye uyan sinyal yok":"Henüz sinyal yok — scanner'ı başlatın"}</div></div>`;
     return;
   }
-  list.innerHTML=signals.map(s=>{
+  list.innerHTML=filtered.map(s=>{
     const score=s.score||0;
     const{label,cls}=s.type==="ALERT"?{label:"⚠️ ALARM",cls:"score-alert"}:getScoreLabel(score,s.type);
     const barColor=scoreBarColor(score);
@@ -1078,6 +1119,14 @@ function renderPositions(){
     const liqDist=Math.abs((liq-cp)/cp*100);
     const liqWarn=liqDist<5;
     const entryPct=((cp-pos.entryPrice)/pos.entryPrice*100).toFixed(2);
+    // SL/TP potansiyel kazanç-kayıp (giriş fiyatı baz alınır)
+    const _pnl=(target)=>+(Math.abs(target-pos.entryPrice)/pos.entryPrice*pos.leverage*pos.size).toFixed(2);
+    const slLoss  =pos.sl  ?_pnl(pos.sl)  :null;
+    const tp1Pnl  =pos.tp1 ?_pnl(pos.tp1) :null;
+    const tp2Pnl  =pos.tp2 ?_pnl(pos.tp2) :null;
+    const tp3Pnl  =pos.tp3 ?_pnl(pos.tp3) :null;
+    const tp2Dist =pos.tp2 ?Math.abs((pos.tp2-cp)/cp*100).toFixed(2):null;
+    const tp3Dist =pos.tp3 ?Math.abs((pos.tp3-cp)/cp*100).toFixed(2):null;
     return`
     <div class="col-12 col-md-6 col-xl-4">
       <div class="pos-card">
@@ -1114,10 +1163,10 @@ function renderPositions(){
           <div><span style="color:#6e7681">Anlık</span><br><b>$${fp(cp)}</b> <span style="color:${entryPct>=0?"#3fb950":"#f85149"};font-size:.7rem">${entryPct>=0?"+":""}${entryPct}%</span></div>
           <div><span style="color:#6e7681">Büyüklük</span><br><b>$${pos.size} × ${pos.leverage}x</b></div>
           <div><span style="color:#6e7681">Marj</span><br><b>$${(pos.size/pos.leverage).toFixed(2)}</b></div>
-          ${pos.sl?`<div><span style="color:#f85149">Stop Loss</span><br><b>$${fp(pos.sl)}</b> <span style="color:#6e7681;font-size:.68rem">%${slDist} uzakta</span></div>`:""}
-          ${pos.tp1?`<div><span style="color:#3fb950">TP1</span><br><b>$${fp(pos.tp1)}</b> <span style="color:#6e7681;font-size:.68rem">%${tp1Dist} uzakta</span></div>`:""}
-          ${pos.tp2?`<div><span style="color:#58c973">TP2</span><br><b>$${fp(pos.tp2)}</b></div>`:""}
-          ${pos.tp3?`<div><span style="color:#7ee0a0">TP3</span><br><b>$${fp(pos.tp3)}</b></div>`:""}
+          ${pos.sl?`<div><span style="color:#f85149">Stop Loss</span><br><b>$${fp(pos.sl)}</b> <span style="color:#6e7681;font-size:.68rem">%${slDist} uzakta</span>${slLoss!==null?`<br><span style="color:#f85149;font-size:.7rem;font-weight:600">−$${slLoss} USDT${usdTry?` ≈ −${tl(slLoss)}`:""}`:""}</span></div>`:""}
+          ${pos.tp1?`<div><span style="color:#3fb950">TP1</span><br><b>$${fp(pos.tp1)}</b> <span style="color:#6e7681;font-size:.68rem">%${tp1Dist} uzakta</span>${tp1Pnl!==null?`<br><span style="color:#3fb950;font-size:.7rem;font-weight:600">+$${tp1Pnl} USDT${usdTry?` ≈ +${tl(tp1Pnl)}`:""}`:""}</span></div>`:""}
+          ${pos.tp2?`<div><span style="color:#58c973">TP2</span><br><b>$${fp(pos.tp2)}</b> <span style="color:#6e7681;font-size:.68rem">%${tp2Dist} uzakta</span>${tp2Pnl!==null?`<br><span style="color:#58c973;font-size:.7rem;font-weight:600">+$${tp2Pnl} USDT${usdTry?` ≈ +${tl(tp2Pnl)}`:""}`:""}</span></div>`:""}
+          ${pos.tp3?`<div><span style="color:#7ee0a0">TP3</span><br><b>$${fp(pos.tp3)}</b> <span style="color:#6e7681;font-size:.68rem">%${tp3Dist} uzakta</span>${tp3Pnl!==null?`<br><span style="color:#7ee0a0;font-size:.7rem;font-weight:600">+$${tp3Pnl} USDT${usdTry?` ≈ +${tl(tp3Pnl)}`:""}`:""}</span></div>`:""}
           <div class="${liqWarn?"liq-warn":""}"><span style="color:${liqWarn?"#f85149":"#6e7681"}">Tasfiye</span><br><b>$${fp(liq)}</b> <span style="font-size:.68rem">${liqWarn?"⚠️ YAKLAŞIYOR":"%"+liqDist.toFixed(1)+" uzakta"}</span></div>
           <div><span style="color:#6e7681">Açılış</span><br><span style="font-size:.7rem">${pos.openedAt||"-"}</span></div>
         </div>
