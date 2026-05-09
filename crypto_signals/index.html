@@ -137,11 +137,18 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 .preset-btn:hover{background:#30363d;color:#c9d1d9}
 .empty{text-align:center;padding:2.5rem 1rem;color:#484f58}
 .empty i{font-size:1.8rem;display:block;margin-bottom:.5rem}
-/* modal */
-.modal-content{background:#161b22;border:1px solid #30363d;color:#c9d1d9}
-.modal-header{background:#21262d;border-bottom:1px solid #30363d}
-.modal-footer{background:#21262d;border-top:1px solid #30363d}
-.btn-close{filter:invert(1)}
+/* custom modal */
+.m-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+.m-overlay.open{display:flex}
+.m-box{background:#161b22;border:1px solid #30363d;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;flex-shrink:0}
+.m-box::-webkit-scrollbar{width:4px}
+.m-box::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+.m-head{background:#21262d;border-bottom:1px solid #30363d;border-radius:12px 12px 0 0;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.m-head h6{color:#e6edf3;font-size:.9rem;font-weight:600;margin:0}
+.m-close{background:none;border:none;color:#6e7681;font-size:1.3rem;cursor:pointer;line-height:1;padding:.1rem .3rem;border-radius:4px}
+.m-close:hover{background:#30363d;color:#c9d1d9}
+.m-body{padding:1rem}
+.m-foot{background:#21262d;border-top:1px solid #30363d;border-radius:0 0 12px 12px;padding:.65rem 1rem;display:flex;gap:.5rem;justify-content:flex-end}
 /* win rate info */
 .wr-box{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
 .wr-item{background:#21262d;border:1px solid #30363d;border-radius:5px;padding:.2rem .5rem;font-size:.68rem;text-align:center}
@@ -196,7 +203,7 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 <div class="tab-pane" id="tab-pos">
   <div class="d-flex align-items-center justify-content-between my-3">
     <h6 style="color:#e6edf3;margin:0"><i class="bi bi-wallet2 me-2"></i>Açık Pozisyonlar</h6>
-    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#posModal">
+    <button class="btn btn-success btn-sm" onclick="mShow('posModal')">
       <i class="bi bi-plus-lg"></i> Yeni Pozisyon
     </button>
   </div>
@@ -312,69 +319,66 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 </div><!-- /wrap -->
 
 <!-- Pozisyon Modal -->
-<div class="modal fade" id="posModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h6 class="modal-title" style="color:#e6edf3">Pozisyon Ekle</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="m-overlay" id="posModal" onclick="if(event.target===this)mHide('posModal')">
+  <div class="m-box">
+    <div class="m-head">
+      <h6>Pozisyon Ekle</h6>
+      <button class="m-close" onclick="mHide('posModal')">×</button>
+    </div>
+    <div class="m-body">
+      <div class="row g-2">
+        <div class="col-6"><label class="form-label">Sembol</label>
+          <input type="text" id="pSym" class="form-control form-control-sm font-monospace" placeholder="BTCUSDT"></div>
+        <div class="col-6"><label class="form-label">Yön</label>
+          <select id="pDir" class="form-select form-select-sm">
+            <option value="LONG">LONG ↑</option><option value="SHORT">SHORT ↓</option>
+          </select></div>
+        <div class="col-6"><label class="form-label">Giriş Fiyatı ($)</label>
+          <input type="number" id="pEntry" class="form-control form-control-sm" placeholder="80000" step="any"></div>
+        <div class="col-6"><label class="form-label">Pozisyon Büyüklüğü ($)</label>
+          <input type="number" id="pSize" class="form-control form-control-sm" placeholder="100" step="any"></div>
+        <div class="col-6"><label class="form-label">Kaldıraç (×)</label>
+          <input type="number" id="pLev" class="form-control form-control-sm" value="10" min="1" max="100"></div>
+        <div class="col-6"><label class="form-label">Stop Loss ($)</label>
+          <input type="number" id="pSL" class="form-control form-control-sm" placeholder="Opsiyonel" step="any"></div>
+        <div class="col-4"><label class="form-label">TP1 ($)</label>
+          <input type="number" id="pTP1" class="form-control form-control-sm" step="any"></div>
+        <div class="col-4"><label class="form-label">TP2 ($)</label>
+          <input type="number" id="pTP2" class="form-control form-control-sm" step="any"></div>
+        <div class="col-4"><label class="form-label">TP3 ($)</label>
+          <input type="number" id="pTP3" class="form-control form-control-sm" step="any"></div>
+        <div class="col-12"><label class="form-label">Not</label>
+          <input type="text" id="pNote" class="form-control form-control-sm" placeholder="Opsiyonel"></div>
       </div>
-      <div class="modal-body">
-        <div class="row g-2">
-          <div class="col-6"><label class="form-label">Sembol</label>
-            <input type="text" id="pSym" class="form-control form-control-sm font-monospace" placeholder="BTCUSDT"></div>
-          <div class="col-6"><label class="form-label">Yön</label>
-            <select id="pDir" class="form-select form-select-sm">
-              <option value="LONG">LONG ↑</option><option value="SHORT">SHORT ↓</option>
-            </select></div>
-          <div class="col-6"><label class="form-label">Giriş Fiyatı ($)</label>
-            <input type="number" id="pEntry" class="form-control form-control-sm" placeholder="80000" step="any"></div>
-          <div class="col-6"><label class="form-label">Pozisyon Büyüklüğü ($)</label>
-            <input type="number" id="pSize" class="form-control form-control-sm" placeholder="100" step="any"></div>
-          <div class="col-6"><label class="form-label">Kaldıraç (×)</label>
-            <input type="number" id="pLev" class="form-control form-control-sm" value="10" min="1" max="100"></div>
-          <div class="col-6"><label class="form-label">Stop Loss ($)</label>
-            <input type="number" id="pSL" class="form-control form-control-sm" placeholder="Opsiyonel" step="any"></div>
-          <div class="col-4"><label class="form-label">TP1 ($)</label>
-            <input type="number" id="pTP1" class="form-control form-control-sm" step="any"></div>
-          <div class="col-4"><label class="form-label">TP2 ($)</label>
-            <input type="number" id="pTP2" class="form-control form-control-sm" step="any"></div>
-          <div class="col-4"><label class="form-label">TP3 ($)</label>
-            <input type="number" id="pTP3" class="form-control form-control-sm" step="any"></div>
-          <div class="col-12"><label class="form-label">Not</label>
-            <input type="text" id="pNote" class="form-control form-control-sm" placeholder="Opsiyonel"></div>
-        </div>
-        <div id="posCalcPreview" class="mt-3" style="display:none">
-          <div class="info-box" id="posCalcBox"></div>
-        </div>
+      <div id="posCalcPreview" class="mt-3" style="display:none">
+        <div class="info-box" id="posCalcBox"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary btn-sm" id="btnCalcPos">Hesapla</button>
-        <button class="btn btn-success btn-sm" id="btnAddPos">Pozisyon Aç</button>
-      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline-secondary btn-sm" id="btnCalcPos">Hesapla</button>
+      <button class="btn btn-success btn-sm" id="btnAddPos">Pozisyon Aç</button>
     </div>
   </div>
 </div>
 
 <!-- Kapat Modal -->
-<div class="modal fade" id="closeModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content">
-      <div class="modal-header"><h6 class="modal-title" style="color:#e6edf3">Pozisyon Kapat</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <label class="form-label">Çıkış Fiyatı ($)</label>
-        <input type="number" id="closePrice" class="form-control form-control-sm" step="any">
-        <input type="hidden" id="closePosId">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger btn-sm" id="btnConfirmClose">Kapat & Kaydet</button>
-      </div>
+<div class="m-overlay" id="closeModal" onclick="if(event.target===this)mHide('closeModal')">
+  <div class="m-box" style="max-width:360px">
+    <div class="m-head">
+      <h6>Pozisyon Kapat</h6>
+      <button class="m-close" onclick="mHide('closeModal')">×</button>
+    </div>
+    <div class="m-body">
+      <label class="form-label">Çıkış Fiyatı ($)</label>
+      <input type="number" id="closePrice" class="form-control form-control-sm" step="any">
+      <input type="hidden" id="closePosId">
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline-secondary btn-sm" onclick="mHide('closeModal')">İptal</button>
+      <button class="btn btn-danger btn-sm" id="btnConfirmClose">Kapat & Kaydet</button>
     </div>
   </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ════════════════════════════════════
 //  CONFIG
@@ -1117,6 +1121,9 @@ function renderTradeHistory(){
     </div>`).join("")}`;
 }
 
+function mShow(id){document.getElementById(id).classList.add("open")}
+function mHide(id){document.getElementById(id).classList.remove("open")}
+
 function openPosFromSignal(sym,dir,price,sl,tp1,tp2,tp3){
   document.getElementById("pSym").value=sym;
   document.getElementById("pDir").value=dir;
@@ -1125,7 +1132,8 @@ function openPosFromSignal(sym,dir,price,sl,tp1,tp2,tp3){
   document.getElementById("pTP1").value=tp1||"";
   document.getElementById("pTP2").value=tp2||"";
   document.getElementById("pTP3").value=tp3||"";
-  new bootstrap.Modal(document.getElementById("posModal")).show();
+  document.getElementById("posCalcPreview").style.display="none";
+  mShow("posModal");
 }
 
 function calcPosPreview(){
@@ -1170,8 +1178,7 @@ function addPosition(){
     openedAt:new Date().toLocaleString("tr-TR")
   };
   positions.unshift(pos);savePos();
-  bootstrap.Modal.getInstance(document.getElementById("posModal")).hide();
-  // Switch to pos tab
+  mHide("posModal");
   document.querySelectorAll(".tab-btn").forEach(b=>{if(b.textContent.includes("Pozisyon"))b.click()});
 }
 
@@ -1180,7 +1187,7 @@ function openCloseModal(id){
   const pos=positions.find(p=>p.id===id);
   const cp=marketData[pos.symbol]?.price||pos.entryPrice;
   document.getElementById("closePrice").value=cp;
-  new bootstrap.Modal(document.getElementById("closeModal")).show();
+  mShow("closeModal");
 }
 
 function confirmClose(){
@@ -1192,7 +1199,7 @@ function confirmClose(){
   closedTrades.unshift({...pos,exitPrice,pnlPct,pnlUSDT,closedAt:new Date().toLocaleString("tr-TR")});
   positions=positions.filter(p=>p.id!==id);
   savePos();saveClosed();
-  bootstrap.Modal.getInstance(document.getElementById("closeModal")).hide();
+  mHide("closeModal");
   renderPositions();renderTradeHistory();
 }
 
@@ -1209,7 +1216,7 @@ function editPosition(id){
   document.getElementById("pTP3").value=pos.tp3||"";
   document.getElementById("pNote").value=pos.note||"";
   positions=positions.filter(p=>p.id!==id);savePos();
-  new bootstrap.Modal(document.getElementById("posModal")).show();
+  mShow("posModal");
 }
 
 // Pozisyon fiyatlarını 10sn'de bir güncelle
