@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kripto Sinyal Botu</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  body{background:#0d1117;color:#e6edf3;font-family:'Segoe UI',system-ui,sans-serif}
+  .navbar{background:#161b22!important;border-bottom:1px solid #30363d}
+  .navbar-brand{font-weight:700;letter-spacing:1px;color:#58a6ff!important}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:12px}
+  .card-header{background:#21262d;border-bottom:1px solid #30363d;border-radius:12px 12px 0 0!important;padding:.75rem 1rem}
+  .price-card{transition:transform .15s;cursor:default}
+  .price-card:hover{transform:translateY(-3px);border-color:#58a6ff!important}
+  .badge-buy{background:#1a7f4a}
+  .badge-sell{background:#8b1a1a}
+  .badge-alert{background:#7f5a1a}
+  .signal-row{border-left:3px solid transparent;transition:background .2s}
+  .signal-row:hover{background:#21262d}
+  .signal-row.BUY{border-color:#2ea043}
+  .signal-row.SELL{border-color:#f85149}
+  .signal-row.ALERT{border-color:#d29922}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+  .dot-on{background:#2ea043;animation:pulse 1.5s infinite}
+  .dot-off{background:#6e7681}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .change-pos{color:#2ea043}
+  .change-neg{color:#f85149}
+  .form-control,.form-select{background:#0d1117;border:1px solid #30363d;color:#e6edf3}
+  .form-control:focus,.form-select:focus{background:#0d1117;border-color:#58a6ff;color:#e6edf3;box-shadow:none}
+  .form-control::placeholder{color:#6e7681}
+  .tab-content{padding:1.5rem 0}
+  .nav-tabs{border-bottom:1px solid #30363d}
+  .nav-tabs .nav-link{color:#8b949e;border:none;border-bottom:2px solid transparent;border-radius:0;padding:.5rem 1rem}
+  .nav-tabs .nav-link.active{color:#e6edf3;background:transparent;border-bottom-color:#58a6ff}
+  .nav-tabs .nav-link:hover{color:#e6edf3;border-bottom-color:#30363d}
+  #signalList{max-height:500px;overflow-y:auto}
+  .countdown-bar{height:3px;background:#58a6ff;transition:width 1s linear;border-radius:2px}
+  .sym-tag{display:inline-flex;align-items:center;gap:.4rem;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:.25rem .6rem;font-size:.85rem}
+  .sym-tag .remove{cursor:pointer;color:#6e7681}
+  .sym-tag .remove:hover{color:#f85149}
+  small.hint{color:#6e7681;font-size:.78rem}
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg mb-0">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand"><i class="bi bi-graph-up-arrow me-2"></i>Kripto Sinyal</span>
+    <ul class="nav nav-tabs border-0 ms-4" id="mainTabs">
+      <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabDash">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a></li>
+      <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSettings">
+        <i class="bi bi-gear"></i> Ayarlar
+      </a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container-fluid px-4 pb-5">
+<div class="tab-content">
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div class="tab-pane fade show active" id="tabDash">
+
+  <!-- Kontrol satırı -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <span class="dot dot-off" id="scanDot"></span>
+    <span id="scanLabel" class="text-secondary">Durduruldu</span>
+    <small id="scanNext" class="text-secondary"></small>
+    <div class="ms-auto d-flex gap-2">
+      <button class="btn btn-success btn-sm" id="btnStart"><i class="bi bi-play-fill"></i> Başlat</button>
+      <button class="btn btn-danger btn-sm" id="btnStop" disabled><i class="bi bi-stop-fill"></i> Durdur</button>
+      <button class="btn btn-outline-secondary btn-sm" id="btnScanNow"><i class="bi bi-arrow-repeat"></i> Şimdi Tara</button>
+      <button class="btn btn-outline-secondary btn-sm" id="btnClear"><i class="bi bi-trash"></i> Temizle</button>
+    </div>
+  </div>
+  <div class="countdown-bar mb-4" id="cntBar" style="width:0%"></div>
+
+  <!-- Fiyat kartları -->
+  <div class="row g-3 mb-4" id="priceCards">
+    <div class="col-12 text-center text-secondary py-3" id="priceMsg">
+      <i class="bi bi-arrow-repeat"></i> Başlatmak için "Başlat" butonuna bas
+    </div>
+  </div>
+
+  <!-- Sinyal akışı -->
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span><i class="bi bi-bell-fill me-2 text-warning"></i>Sinyal Akışı</span>
+      <small class="text-secondary" id="sigCount"></small>
+    </div>
+    <div id="signalList">
+      <div class="text-secondary text-center py-4 px-3" id="noSig">
+        Henüz sinyal yok — scanner'ı başlatın ve bekleyin.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dashboard -->
+
+<!-- ═══════════════════════ AYARLAR ═══════════════════════ -->
+<div class="tab-pane fade" id="tabSettings">
+<div class="row g-4 mt-0">
+
+  <!-- Sol -->
+  <div class="col-lg-6">
+
+    <!-- Telegram -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-telegram me-2 text-info"></i>Telegram Bildirimleri</div>
+      <div class="card-body">
+
+        <div class="alert alert-secondary py-2 small mb-3">
+          <strong>Bot nasıl oluşturulur?</strong><br>
+          1. Telegram'da <code>@BotFather</code>'ı aç<br>
+          2. <code>/newbot</code> yaz → bot adı ver → token al<br>
+          3. Kendi botuna <code>/start</code> yaz<br>
+          4. Aşağıdaki butona bas → Chat ID otomatik gelir
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Bot Token</label>
+          <input type="text" id="cfgToken" class="form-control font-monospace"
+                 placeholder="123456789:AAHxyz...">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Chat ID</label>
+          <div class="input-group">
+            <input type="text" id="cfgChatId" class="form-control font-monospace" placeholder="123456789">
+            <button class="btn btn-outline-info" id="btnGetChatId" type="button">
+              <i class="bi bi-arrow-down-circle"></i> Otomatik Al
+            </button>
+          </div>
+          <small class="hint">Token'ı gir, bota /start yaz, butona bas</small>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-outline-info btn-sm" id="btnTestTg">
+            <i class="bi bi-send"></i> Test Gönder
+          </button>
+          <span id="tgResult" class="small"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarama -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-sliders me-2 text-warning"></i>Tarama Ayarları</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Zaman Dilimi</label>
+            <select id="cfgTf" class="form-select">
+              <option>1m</option><option>5m</option><option>15m</option>
+              <option>30m</option><option selected>1h</option><option>4h</option><option>1d</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Aralık (saniye)</label>
+            <input type="number" id="cfgInterval" class="form-control" value="60" min="10" max="3600">
+          </div>
+          <div class="col-6">
+            <label class="form-label">RSI Aşırı Satım</label>
+            <input type="number" id="cfgOversold" class="form-control" value="30" min="5" max="49">
+          </div>
+          <div class="col-6">
+            <label class="form-label">RSI Aşırı Alım</label>
+            <input type="number" id="cfgOverbought" class="form-control" value="70" min="51" max="95">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sağ -->
+  <div class="col-lg-6">
+
+    <!-- Semboller -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-currency-bitcoin me-2 text-warning"></i>İzlenen Semboller</div>
+      <div class="card-body">
+        <div id="symTags" class="d-flex flex-wrap gap-2 mb-3"></div>
+        <div class="input-group">
+          <input type="text" id="symInput" class="form-control" placeholder="BTCUSDT veya BTC/USDT">
+          <button class="btn btn-outline-primary" id="btnAddSym"><i class="bi bi-plus"></i> Ekle</button>
+        </div>
+        <small class="hint">Enter veya Ekle butonuna bas</small>
+      </div>
+    </div>
+
+    <!-- Fiyat Alarmları -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-alarm me-2 text-danger"></i>Fiyat Alarmları</div>
+      <div class="card-body">
+        <p class="small text-secondary">Boş bırakılan alanlar için alarm gelmez.</p>
+        <div id="alertFields"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<button class="btn btn-primary px-4" id="btnSave">
+  <i class="bi bi-floppy"></i> Kaydet
+</button>
+<span class="ms-3 small text-secondary" id="saveMsg"></span>
+
+</div><!-- /settings -->
+</div><!-- /tab-content -->
+</div><!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════
+//  AYARLAR (localStorage)
+// ═══════════════════════════════════════════════════
+const DEFAULT_CFG = {
+  symbols:["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT"],
+  timeframe:"1h", interval:60,
+  rsiOs:30, rsiOb:70,
+  token:"", chatId:"",
+  alerts:{} // {BTCUSDT:{above:100000,below:80000}}
+};
+
+function loadCfg(){
+  try{ return {...DEFAULT_CFG,...JSON.parse(localStorage.getItem("kriptoCfg")||"{}")}; }
+  catch{ return {...DEFAULT_CFG}; }
+}
+function saveCfg(c){ localStorage.setItem("kriptoCfg", JSON.stringify(c)); }
+
+let CFG = loadCfg();
+let signals = JSON.parse(localStorage.getItem("kriptoSigs")||"[]");
+
+function saveSignals(){ localStorage.setItem("kriptoSigs", JSON.stringify(signals.slice(0,200))); }
+
+// ═══════════════════════════════════════════════════
+//  İNDİKATÖRLER (JS)
+// ═══════════════════════════════════════════════════
+function calcRSI(closes, period=14){
+  let gains=[], losses=[];
+  for(let i=1;i<closes.length;i++){
+    const d=closes[i]-closes[i-1];
+    gains.push(d>0?d:0); losses.push(d<0?-d:0);
+  }
+  // Wilder's smoothing
+  let ag=gains.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  let al=losses.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  for(let i=period;i<gains.length;i++){
+    ag=(ag*(period-1)+gains[i])/period;
+    al=(al*(period-1)+losses[i])/period;
+  }
+  if(al===0) return 100;
+  return 100-(100/(1+ag/al));
+}
+
+function calcEMA(arr, span){
+  const k=2/(span+1); let ema=arr[0];
+  return arr.map((v,i)=>{ if(i===0){ema=v;}else{ema=v*k+ema*(1-k);} return ema; });
+}
+
+function calcMACD(closes){
+  const fast=calcEMA(closes,12), slow=calcEMA(closes,26);
+  const macd=fast.map((v,i)=>v-slow[i]);
+  const signal=calcEMA(macd,9);
+  return {macd, signal};
+}
+
+function calcBB(closes, period=20, mult=2){
+  const mid=closes.map((_,i)=>{
+    if(i<period-1) return null;
+    const sl=closes.slice(i-period+1,i+1);
+    return sl.reduce((a,b)=>a+b,0)/period;
+  });
+  const upper=closes.map((_,i)=>{
+    if(i<period-1) return null;
+    const sl=closes.slice(i-period+1,i+1);
+    const m=mid[i];
+    const std=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/period);
+    return m+mult*std;
+  });
+  const lower=closes.map((_,i)=>{
+    if(i<period-1) return null;
+    const sl=closes.slice(i-period+1,i+1);
+    const m=mid[i];
+    const std=Math.sqrt(sl.reduce((a,b)=>a+(b-m)**2,0)/period);
+    return m-mult*std;
+  });
+  return {upper,mid,lower};
+}
+
+// ═══════════════════════════════════════════════════
+//  BİNANCE API
+// ═══════════════════════════════════════════════════
+function normSym(s){ return s.replace("/","").toUpperCase(); }
+
+async function fetchKlines(symbol, interval, limit=100){
+  const url=`https://api.binance.com/api/v3/klines?symbol=${normSym(symbol)}&interval=${interval}&limit=${limit}`;
+  const r=await fetch(url); if(!r.ok) throw new Error(r.status);
+  return (await r.json()).map(k=>({
+    t:new Date(k[0]), o:+k[1], h:+k[2], l:+k[3], c:+k[4], v:+k[5]
+  }));
+}
+
+async function fetchTicker(symbol){
+  const url=`https://api.binance.com/api/v3/ticker/24hr?symbol=${normSym(symbol)}`;
+  const r=await fetch(url); if(!r.ok) throw new Error(r.status);
+  return await r.json();
+}
+
+// ═══════════════════════════════════════════════════
+//  TELEGRAM
+// ═══════════════════════════════════════════════════
+async function sendTelegram(text){
+  const {token,chatId}=CFG;
+  if(!token||!chatId) return;
+  try{
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:chatId,text,parse_mode:"Markdown"})
+    });
+  }catch(e){console.warn("Telegram:",e);}
+}
+
+async function getChatId(token){
+  const r=await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+  const j=await r.json();
+  const msg=j.result?.find(u=>u.message?.chat?.id);
+  return msg?.message?.chat?.id?.toString()||null;
+}
+
+// ═══════════════════════════════════════════════════
+//  TARAMA
+// ═══════════════════════════════════════════════════
+const EMOJI={BUY:"🟢",SELL:"🔴",ALERT:"⚠️"};
+let prices={};
+
+function addSignal(sig){
+  sig.time=new Date().toLocaleTimeString("tr-TR");
+  signals.unshift(sig);
+  saveSignals();
+  renderSignals();
+  const em=EMOJI[sig.type]||"ℹ️";
+  sendTelegram(`${em} *${sig.type}* — ${sig.symbol}\n💰 Fiyat: \`${sig.price}\`\n📊 RSI: \`${sig.rsi??"-"}\`\n📝 ${sig.reason}`);
+}
+
+async function scanSymbol(sym){
+  const klines=await fetchKlines(sym, CFG.timeframe, 100);
+  const ticker=await fetchTicker(sym);
+  const price=+ticker.lastPrice;
+  const change=+ticker.priceChangePercent;
+
+  prices[normSym(sym)]={price,change};
+
+  const closes=klines.map(k=>k.c);
+  const rsi=calcRSI(closes);
+  const {macd,signal}=calcMACD(closes);
+  const {upper,lower}=calcBB(closes);
+
+  const n=closes.length-1;
+  const priceStr=price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:6});
+
+  // RSI
+  if(rsi<CFG.rsiOs)
+    addSignal({symbol:normSym(sym),type:"BUY",reason:`RSI aşırı satım (${rsi.toFixed(1)} < ${CFG.rsiOs})`,price:priceStr,rsi:rsi.toFixed(1)});
+  else if(rsi>CFG.rsiOb)
+    addSignal({symbol:normSym(sym),type:"SELL",reason:`RSI aşırı alım (${rsi.toFixed(1)} > ${CFG.rsiOb})`,price:priceStr,rsi:rsi.toFixed(1)});
+
+  // MACD kesişim
+  if(macd[n-1]<signal[n-1]&&macd[n]>signal[n])
+    addSignal({symbol:normSym(sym),type:"BUY",reason:"MACD yukarı kesişim",price:priceStr,rsi:rsi.toFixed(1)});
+  else if(macd[n-1]>signal[n-1]&&macd[n]<signal[n])
+    addSignal({symbol:normSym(sym),type:"SELL",reason:"MACD aşağı kesişim",price:priceStr,rsi:rsi.toFixed(1)});
+
+  // Bollinger
+  if(upper[n]!=null&&price>upper[n])
+    addSignal({symbol:normSym(sym),type:"SELL",reason:`Fiyat üst BB üstünde (${upper[n].toFixed(2)})`,price:priceStr,rsi:rsi.toFixed(1)});
+  else if(lower[n]!=null&&price<lower[n])
+    addSignal({symbol:normSym(sym),type:"BUY",reason:`Fiyat alt BB altında (${lower[n].toFixed(2)})`,price:priceStr,rsi:rsi.toFixed(1)});
+
+  // Fiyat alarmları
+  const al=CFG.alerts[normSym(sym)]||{};
+  if(al.above&&price>al.above)
+    addSignal({symbol:normSym(sym),type:"ALERT",reason:`Fiyat ${al.above} üstüne çıktı`,price:priceStr,rsi:rsi.toFixed(1)});
+  if(al.below&&price<al.below)
+    addSignal({symbol:normSym(sym),type:"ALERT",reason:`Fiyat ${al.below} altına düştü`,price:priceStr,rsi:rsi.toFixed(1)});
+}
+
+async function scanAll(){
+  const ps=CFG.symbols.map(s=>scanSymbol(s).catch(e=>console.error(s,e)));
+  await Promise.all(ps);
+  renderPrices();
+}
+
+// ═══════════════════════════════════════════════════
+//  ZAMANLAYICI
+// ═══════════════════════════════════════════════════
+let timer=null, cntTimer=null, cntLeft=0;
+
+function startScanner(){
+  if(timer) return;
+  scanAll();
+  timer=setInterval(()=>{ scanAll(); cntLeft=CFG.interval; }, CFG.interval*1000);
+  cntLeft=CFG.interval;
+  cntTimer=setInterval(()=>{
+    cntLeft=Math.max(0,cntLeft-1);
+    const pct=(1-cntLeft/CFG.interval)*100;
+    document.getElementById("cntBar").style.width=pct+"%";
+    document.getElementById("scanNext").textContent=cntLeft>0?`Sonraki tarama: ${cntLeft}s`:"Tarıyor…";
+  },1000);
+  setRunning(true);
+}
+
+function stopScanner(){
+  clearInterval(timer); clearInterval(cntTimer); timer=null; cntTimer=null;
+  document.getElementById("cntBar").style.width="0%";
+  document.getElementById("scanNext").textContent="";
+  setRunning(false);
+}
+
+function setRunning(on){
+  document.getElementById("scanDot").className="dot "+(on?"dot-on":"dot-off");
+  document.getElementById("scanLabel").textContent=on?"Çalışıyor":"Durduruldu";
+  document.getElementById("scanLabel").className=on?"text-success":"text-secondary";
+  document.getElementById("btnStart").disabled=on;
+  document.getElementById("btnStop").disabled=!on;
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+function renderPrices(){
+  const wrap=document.getElementById("priceCards");
+  const pm=document.getElementById("priceMsg");
+  if(pm) pm.remove();
+  wrap.innerHTML="";
+  for(const [sym,d] of Object.entries(prices)){
+    const chg=(d.change||0).toFixed(2);
+    const pos=chg>=0;
+    wrap.innerHTML+=`
+    <div class="col-6 col-md-3">
+      <div class="card price-card p-3">
+        <div class="text-secondary small mb-1">${sym}</div>
+        <div class="fs-5 fw-bold">$${Number(d.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:6})}</div>
+        <div class="${pos?"change-pos":"change-neg"} small">${pos?"▲":"▼"} ${chg}%</div>
+      </div>
+    </div>`;
+  }
+}
+
+function renderSignals(){
+  const list=document.getElementById("signalList");
+  const ns=document.getElementById("noSig");
+  document.getElementById("sigCount").textContent=signals.length?" "+signals.length+" sinyal":"";
+  if(!signals.length){
+    list.innerHTML=`<div class="text-secondary text-center py-4 px-3" id="noSig">Henüz sinyal yok — scanner'ı başlatın ve bekleyin.</div>`;
+    return;
+  }
+  if(ns) ns.remove();
+  list.innerHTML=signals.map(s=>`
+  <div class="signal-row ${s.type} px-4 py-3 border-bottom border-secondary border-opacity-25 d-flex gap-3">
+    <span class="fs-5 mt-1">${EMOJI[s.type]||"ℹ️"}</span>
+    <div class="flex-grow-1">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge badge-${s.type.toLowerCase()}">${s.type}</span>
+        <strong>${s.symbol}</strong>
+        <span class="text-secondary small ms-auto">${s.time||""}</span>
+      </div>
+      <div class="small text-secondary">${s.reason}</div>
+      <div class="small mt-1">
+        💰 <span class="fw-bold">$${s.price}</span>
+        ${s.rsi?`&nbsp;|&nbsp; RSI: <span class="fw-bold">${s.rsi}</span>`:""}
+      </div>
+    </div>
+  </div>`).join("");
+}
+
+// ═══════════════════════════════════════════════════
+//  AYARLAR UI
+// ═══════════════════════════════════════════════════
+function renderSymTags(){
+  const wrap=document.getElementById("symTags");
+  wrap.innerHTML=CFG.symbols.map(s=>`
+    <span class="sym-tag">
+      ${normSym(s)}
+      <span class="remove" data-sym="${normSym(s)}">✕</span>
+    </span>`).join("");
+  wrap.querySelectorAll(".remove").forEach(el=>el.addEventListener("click",()=>{
+    CFG.symbols=CFG.symbols.filter(x=>normSym(x)!==el.dataset.sym);
+    renderSymTags(); renderAlertFields();
+  }));
+}
+
+function renderAlertFields(){
+  const wrap=document.getElementById("alertFields");
+  wrap.innerHTML=CFG.symbols.map(s=>{
+    const sym=normSym(s);
+    const al=CFG.alerts[sym]||{};
+    return `
+    <div class="mb-3">
+      <label class="form-label fw-bold small">${sym}</label>
+      <div class="row g-2">
+        <div class="col-6">
+          <input type="number" class="form-control form-control-sm alert-above" data-sym="${sym}"
+                 placeholder="Üst limit ($)" step="any" value="${al.above||""}">
+        </div>
+        <div class="col-6">
+          <input type="number" class="form-control form-control-sm alert-below" data-sym="${sym}"
+                 placeholder="Alt limit ($)" step="any" value="${al.below||""}">
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function loadSettingsUI(){
+  document.getElementById("cfgToken").value=CFG.token||"";
+  document.getElementById("cfgChatId").value=CFG.chatId||"";
+  document.getElementById("cfgTf").value=CFG.timeframe||"1h";
+  document.getElementById("cfgInterval").value=CFG.interval||60;
+  document.getElementById("cfgOversold").value=CFG.rsiOs||30;
+  document.getElementById("cfgOverbought").value=CFG.rsiOb||70;
+  renderSymTags();
+  renderAlertFields();
+}
+
+function collectAndSave(){
+  CFG.token=document.getElementById("cfgToken").value.trim();
+  CFG.chatId=document.getElementById("cfgChatId").value.trim();
+  CFG.timeframe=document.getElementById("cfgTf").value;
+  CFG.interval=+document.getElementById("cfgInterval").value||60;
+  CFG.rsiOs=+document.getElementById("cfgOversold").value||30;
+  CFG.rsiOb=+document.getElementById("cfgOverbought").value||70;
+  // alarmlar
+  CFG.alerts={};
+  document.querySelectorAll(".alert-above").forEach(el=>{
+    if(el.value) { CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{}; CFG.alerts[el.dataset.sym].above=+el.value; }
+  });
+  document.querySelectorAll(".alert-below").forEach(el=>{
+    if(el.value) { CFG.alerts[el.dataset.sym]=CFG.alerts[el.dataset.sym]||{}; CFG.alerts[el.dataset.sym].below=+el.value; }
+  });
+  saveCfg(CFG);
+  const msg=document.getElementById("saveMsg");
+  msg.textContent="✅ Kaydedildi"; msg.className="small text-success";
+  setTimeout(()=>{msg.textContent="";},2500);
+}
+
+function addSymbol(raw){
+  const sym=normSym(raw.trim());
+  if(!sym||CFG.symbols.map(normSym).includes(sym)) return;
+  CFG.symbols.push(sym);
+  renderSymTags(); renderAlertFields();
+}
+
+// ═══════════════════════════════════════════════════
+//  OLAYLAR
+// ═══════════════════════════════════════════════════
+document.getElementById("btnStart").addEventListener("click",startScanner);
+document.getElementById("btnStop").addEventListener("click",stopScanner);
+document.getElementById("btnScanNow").addEventListener("click",()=>scanAll());
+document.getElementById("btnClear").addEventListener("click",()=>{
+  if(!confirm("Tüm sinyaller silinsin mi?")) return;
+  signals=[]; saveSignals(); renderSignals();
+});
+document.getElementById("btnSave").addEventListener("click",collectAndSave);
+
+document.getElementById("btnAddSym").addEventListener("click",()=>{
+  addSymbol(document.getElementById("symInput").value);
+  document.getElementById("symInput").value="";
+});
+document.getElementById("symInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){ addSymbol(e.target.value); e.target.value=""; }
+});
+
+document.getElementById("btnTestTg").addEventListener("click",async()=>{
+  collectAndSave();
+  const res=document.getElementById("tgResult");
+  if(!CFG.token||!CFG.chatId){ res.textContent="⚠️ Token ve Chat ID gerekli"; res.className="small text-warning"; return; }
+  res.textContent="Gönderiliyor…"; res.className="small text-secondary";
+  try{
+    const r=await fetch(`https://api.telegram.org/bot${CFG.token}/sendMessage`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:CFG.chatId,text:"✅ Kripto Sinyal Botu aktif!"})
+    });
+    const j=await r.json();
+    if(j.ok){ res.textContent="✅ Telegram'a ulaştı!"; res.className="small text-success"; }
+    else{ res.textContent="❌ "+j.description; res.className="small text-danger"; }
+  }catch(e){ res.textContent="❌ Hata: "+e.message; res.className="small text-danger"; }
+});
+
+document.getElementById("btnGetChatId").addEventListener("click",async()=>{
+  const token=document.getElementById("cfgToken").value.trim();
+  if(!token){ alert("Önce token gir."); return; }
+  const id=await getChatId(token);
+  if(id){ document.getElementById("cfgChatId").value=id; }
+  else{ alert("Chat ID bulunamadı.\nBotuna /start yazdıktan sonra tekrar dene."); }
+});
+
+// ═══════════════════════════════════════════════════
+//  BAŞLAT
+// ═══════════════════════════════════════════════════
+loadSettingsUI();
+renderSignals();
+</script>
+</body>
+</html>
