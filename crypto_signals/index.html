@@ -50,11 +50,11 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
 .score-bar-fill{height:100%;border-radius:3px;transition:.5s}
 .score-number{font-size:.72rem;color:#8b949e;text-align:right;margin-top:.1rem}
 /* signal rows */
-.sig-list{max-height:620px;overflow-y:auto;overflow-x:hidden}
+.sig-list{display:flex!important;flex-direction:column!important;max-height:640px;overflow-y:auto!important;overflow-x:hidden!important}
 .sig-list::-webkit-scrollbar{width:4px}
 .sig-list::-webkit-scrollbar-track{background:#0d1117}
 .sig-list::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
-.sig-row{display:block;width:100%;padding:.9rem 1.1rem;border-bottom:1px solid #21262d;border-left:4px solid transparent;transition:background .15s;cursor:default}
+.sig-row{display:block!important;width:100%!important;flex-shrink:0!important;padding:.9rem 1.1rem;border-bottom:1px solid #21262d;border-left:4px solid transparent;transition:background .15s;cursor:default;box-sizing:border-box!important}
 .sig-row:hover{background:#1c2128}
 .sig-row.LONG{border-left-color:#2ea043}
 .sig-row.SHORT{border-left-color:#f85149}
@@ -186,7 +186,7 @@ a,span,div,p,label,small,h1,h2,h3,h4,h5,h6,td,th{color:inherit}
       <span><i class="bi bi-bell-fill me-2" style="color:#d29922"></i>Sinyal Akışı</span>
       <small id="sigCount" style="color:#6e7681;font-weight:400"></small>
     </div>
-    <div class="sig-list" id="sigList">
+    <div id="sigList" style="display:flex;flex-direction:column;max-height:640px;overflow-y:auto;overflow-x:hidden">
       <div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok</div></div>
     </div>
   </div>
@@ -946,6 +946,7 @@ function renderPrices(){
 // ════════════════════════════════════
 function renderSignals(){
   const list=document.getElementById("sigList");
+  list.style.cssText="display:flex!important;flex-direction:column!important;max-height:640px;overflow-y:auto;overflow-x:hidden";
   document.getElementById("sigCount").textContent=signals.length?signals.length+" sinyal":"";
   if(!signals.length){
     list.innerHTML=`<div class="empty"><i class="bi bi-inbox"></i><div style="font-size:.82rem">Henüz sinyal yok — scanner'ı başlatın</div></div>`;
@@ -959,7 +960,7 @@ function renderSignals(){
 
     // Reasons — her biri ayrı satır
     const reasonsArr=Array.isArray(s.reasons)?s.reasons:[s.reason||""];
-    const reasonsHtml=reasonsArr.slice(0,6).map(r=>`<div class="r-item">${r}</div>`).join("");
+    const reasonsHtml=reasonsArr.slice(0,6).map(r=>`<div class="r-item" style="display:flex;align-items:baseline;gap:.35rem;line-height:1.6"><span style="color:#484f58;flex-shrink:0">•</span><span>${r}</span></div>`).join("");
 
     // Meta chips
     const chips=[
